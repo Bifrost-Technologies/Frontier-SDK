@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Solnet;
 using Solnet.Programs.Abstract;
 using Solnet.Programs.Utilities;
+using Solnet.Rpc.Models;
 using Solnet.Rpc;
 using Solnet.Rpc.Builders;
 using Solnet.Rpc.Core.Http;
@@ -48,23 +49,23 @@ using Frontier.Types;
 
         public static class FrontierProgram
         {
-            public static Solnet.Rpc.Models.TransactionInstruction InitPlayerAccounts(InitPlayerAccountsAccounts accounts, PublicKey programId)
+            public static TransactionInstruction InitPlayerAccounts(InitPlayerAccountsAccounts accounts, PublicKey programId)
             {
-                List<Solnet.Rpc.Models.AccountMeta> keys = new()
-                {Solnet.Rpc.Models.AccountMeta.Writable(accounts.Owner, true), Solnet.Rpc.Models.AccountMeta.Writable(accounts.PlayerAccount, false), Solnet.Rpc.Models.AccountMeta.Writable(accounts.BaseAccount, false), Solnet.Rpc.Models.AccountMeta.Writable(accounts.ArmyAccount, false), Solnet.Rpc.Models.AccountMeta.ReadOnly(accounts.SystemProgram, false)};
+                List<AccountMeta> keys = new()
+                {AccountMeta.Writable(accounts.Owner, true), AccountMeta.Writable(accounts.PlayerAccount, false), AccountMeta.Writable(accounts.BaseAccount, false), AccountMeta.Writable(accounts.ArmyAccount, false), AccountMeta.ReadOnly(accounts.SystemProgram, false)};
                 byte[] _data = new byte[1200];
                 int offset = 0;
                 _data.WriteU64(5350291014044636550UL, offset);
                 offset += 8;
                 byte[] resultData = new byte[offset];
                 Array.Copy(_data, resultData, offset);
-                return new Solnet.Rpc.Models.TransactionInstruction{Keys = keys, ProgramId = programId.KeyBytes, Data = resultData};
+                return new TransactionInstruction { Keys = keys, ProgramId = programId.KeyBytes, Data = resultData};
             }
 
-            public static Solnet.Rpc.Models.TransactionInstruction BuildStructure(BuildStructureAccounts accounts, uint structureCount, uint structureType, PublicKey programId)
+            public static TransactionInstruction BuildStructure(BuildStructureAccounts accounts, uint structureCount, uint structureType, PublicKey programId)
             {
-                List<Solnet.Rpc.Models.AccountMeta> keys = new()
-                {Solnet.Rpc.Models.AccountMeta.Writable(accounts.Owner, true), Solnet.Rpc.Models.AccountMeta.Writable(accounts.PlayerAccount, false), Solnet.Rpc.Models.AccountMeta.Writable(accounts.BaseAccount, false), Solnet.Rpc.Models.AccountMeta.Writable(accounts.StructureAccount, false), Solnet.Rpc.Models.AccountMeta.ReadOnly(accounts.SystemProgram, false)};
+                List<AccountMeta> keys = new()
+                {AccountMeta.Writable(accounts.Owner, true), AccountMeta.Writable(accounts.PlayerAccount, false), AccountMeta.Writable(accounts.BaseAccount, false), AccountMeta.Writable(accounts.StructureAccount, false), AccountMeta.ReadOnly(accounts.SystemProgram, false)};
                 byte[] _data = new byte[1200];
                 int offset = 0;
                 _data.WriteU64(10501095274977850560UL, offset);
@@ -75,7 +76,7 @@ using Frontier.Types;
                 offset += 4;
                 byte[] resultData = new byte[offset];
                 Array.Copy(_data, resultData, offset);
-                return new Solnet.Rpc.Models.TransactionInstruction{Keys = keys, ProgramId = programId.KeyBytes, Data = resultData};
+                return new TransactionInstruction { Keys = keys, ProgramId = programId.KeyBytes, Data = resultData};
             }
         }
     }
