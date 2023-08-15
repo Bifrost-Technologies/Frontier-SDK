@@ -20,63 +20,53 @@ using Frontier.Accounts;
 using Frontier.Types;
 
     namespace Frontier.Program
+{
+    public static class FrontierProgram
     {
-        public class InitPlayerAccountsAccounts
+        public static TransactionInstruction InitPlayerAccounts(InitPlayerAccountsAccounts accounts, PublicKey programId)
         {
-            public PublicKey Owner { get; set; }
-
-            public PublicKey PlayerAccount { get; set; }
-
-            public PublicKey BaseAccount { get; set; }
-
-            public PublicKey ArmyAccount { get; set; }
-
-            public PublicKey SystemProgram { get; set; }
-        }
-
-        public class BuildStructureAccounts
-        {
-            public PublicKey Owner { get; set; }
-
-            public PublicKey PlayerAccount { get; set; }
-
-            public PublicKey BaseAccount { get; set; }
-
-            public PublicKey StructureAccount { get; set; }
-
-            public PublicKey SystemProgram { get; set; }
-        }
-
-        public static class FrontierProgram
-        {
-            public static TransactionInstruction InitPlayerAccounts(InitPlayerAccountsAccounts accounts, PublicKey programId)
-            {
-                List<AccountMeta> keys = new()
+            List<AccountMeta> keys = new()
                 {AccountMeta.Writable(accounts.Owner, true), AccountMeta.Writable(accounts.PlayerAccount, false), AccountMeta.Writable(accounts.BaseAccount, false), AccountMeta.Writable(accounts.ArmyAccount, false), AccountMeta.ReadOnly(accounts.SystemProgram, false)};
-                byte[] _data = new byte[1200];
-                int offset = 0;
-                _data.WriteU64(5350291014044636550UL, offset);
-                offset += 8;
-                byte[] resultData = new byte[offset];
-                Array.Copy(_data, resultData, offset);
-                return new TransactionInstruction { Keys = keys, ProgramId = programId.KeyBytes, Data = resultData};
-            }
+            byte[] _data = new byte[1200];
+            int offset = 0;
+            _data.WriteU64(5350291014044636550UL, offset);
+            offset += 8;
+            byte[] resultData = new byte[offset];
+            Array.Copy(_data, resultData, offset);
+            return new TransactionInstruction { Keys = keys, ProgramId = programId.KeyBytes, Data = resultData };
+        }
 
-            public static TransactionInstruction BuildStructure(BuildStructureAccounts accounts, uint structureCount, uint structureType, PublicKey programId)
-            {
-                List<AccountMeta> keys = new()
+        public static TransactionInstruction BuildStructure(BuildStructureAccounts accounts, uint structureCount, StructureType structureType, Position position, PublicKey programId)
+        {
+            List<AccountMeta> keys = new()
                 {AccountMeta.Writable(accounts.Owner, true), AccountMeta.Writable(accounts.PlayerAccount, false), AccountMeta.Writable(accounts.BaseAccount, false), AccountMeta.Writable(accounts.StructureAccount, false), AccountMeta.ReadOnly(accounts.SystemProgram, false)};
-                byte[] _data = new byte[1200];
-                int offset = 0;
-                _data.WriteU64(10501095274977850560UL, offset);
-                offset += 8;
-                _data.WriteU32(structureCount, offset);
-                offset += 4;
-                _data.WriteU32(structureType, offset);
-                offset += 4;
-                byte[] resultData = new byte[offset];
-                Array.Copy(_data, resultData, offset);
-                return new TransactionInstruction { Keys = keys, ProgramId = programId.KeyBytes, Data = resultData};
-            }
+            byte[] _data = new byte[1200];
+            int offset = 0;
+            _data.WriteU64(10501095274977850560UL, offset);
+            offset += 8;
+            _data.WriteU32(structureCount, offset);
+            offset += 4;
+            _data.WriteU8((byte)structureType, offset);
+            offset += 1;
+            offset += position.Serialize(_data, offset);
+            byte[] resultData = new byte[offset];
+            Array.Copy(_data, resultData, offset);
+            return new TransactionInstruction { Keys = keys, ProgramId = programId.KeyBytes, Data = resultData };
+        }
+
+        public static TransactionInstruction CollectResources(CollectResourcesAccounts accounts, uint structureCount, PublicKey programId)
+        {
+            List<AccountMeta> keys = new()
+                {AccountMeta.Writable(accounts.Owner, true), AccountMeta.Writable(accounts.PlayerAccount, false), AccountMeta.Writable(accounts.BaseAccount, false), AccountMeta.Writable(accounts.StructureAccount, false)};
+            byte[] _data = new byte[1200];
+            int offset = 0;
+            _data.WriteU64(18180368797663540304UL, offset);
+            offset += 8;
+            _data.WriteU32(structureCount, offset);
+            offset += 4;
+            byte[] resultData = new byte[offset];
+            Array.Copy(_data, resultData, offset);
+            return new TransactionInstruction { Keys = keys, ProgramId = programId.KeyBytes, Data = resultData };
         }
     }
+}

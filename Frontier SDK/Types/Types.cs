@@ -1,4 +1,5 @@
 ﻿using Solnet.Programs.Utilities;
+using Solnet.Wallet;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,6 +8,43 @@ using System.Threading.Tasks;
 
 namespace Frontier.Types
 {
+    public class InitPlayerAccountsAccounts
+    {
+        public PublicKey Owner { get; set; }
+
+        public PublicKey PlayerAccount { get; set; }
+
+        public PublicKey BaseAccount { get; set; }
+
+        public PublicKey ArmyAccount { get; set; }
+
+        public PublicKey SystemProgram { get; set; }
+    }
+
+    public class BuildStructureAccounts
+    {
+        public PublicKey Owner { get; set; }
+
+        public PublicKey PlayerAccount { get; set; }
+
+        public PublicKey BaseAccount { get; set; }
+
+        public PublicKey StructureAccount { get; set; }
+
+        public PublicKey SystemProgram { get; set; }
+    }
+
+    public class CollectResourcesAccounts
+    {
+        public PublicKey Owner { get; set; }
+
+        public PublicKey PlayerAccount { get; set; }
+
+        public PublicKey BaseAccount { get; set; }
+
+        public PublicKey StructureAccount { get; set; }
+    }
+
     public partial class Resources
     {
         public uint Wood { get; set; }
@@ -61,53 +99,45 @@ namespace Frontier.Types
 
     public partial class StructureStats
     {
-        public uint Health { get; set; }
+        public ushort Rank { get; set; }
 
-        public uint Attack { get; set; }
+        public ushort Health { get; set; }
 
-        public uint Defense { get; set; }
+        public ushort Attack { get; set; }
 
-        public uint Speed { get; set; }
+        public ushort Defense { get; set; }
 
-        public uint Range { get; set; }
+        public ushort Speed { get; set; }
 
-        public uint Cost { get; set; }
+        public ushort Range { get; set; }
 
-        public uint Upkeep { get; set; }
+        public byte AssignedWorkers { get; set; }
 
-        public uint BuildTime { get; set; }
+        public ushort CollectionInterval { get; set; }
 
-        public uint Level { get; set; }
-
-        public uint Experience { get; set; }
-
-        public uint ExperienceToLevel { get; set; }
+        public long LastInteractionTime { get; set; }
 
         public int Serialize(byte[] _data, int initialOffset)
         {
             int offset = initialOffset;
-            _data.WriteU32(Health, offset);
-            offset += 4;
-            _data.WriteU32(Attack, offset);
-            offset += 4;
-            _data.WriteU32(Defense, offset);
-            offset += 4;
-            _data.WriteU32(Speed, offset);
-            offset += 4;
-            _data.WriteU32(Range, offset);
-            offset += 4;
-            _data.WriteU32(Cost, offset);
-            offset += 4;
-            _data.WriteU32(Upkeep, offset);
-            offset += 4;
-            _data.WriteU32(BuildTime, offset);
-            offset += 4;
-            _data.WriteU32(Level, offset);
-            offset += 4;
-            _data.WriteU32(Experience, offset);
-            offset += 4;
-            _data.WriteU32(ExperienceToLevel, offset);
-            offset += 4;
+            _data.WriteU16(Rank, offset);
+            offset += 2;
+            _data.WriteU16(Health, offset);
+            offset += 2;
+            _data.WriteU16(Attack, offset);
+            offset += 2;
+            _data.WriteU16(Defense, offset);
+            offset += 2;
+            _data.WriteU16(Speed, offset);
+            offset += 2;
+            _data.WriteU16(Range, offset);
+            offset += 2;
+            _data.WriteU8(AssignedWorkers, offset);
+            offset += 1;
+            _data.WriteU16(CollectionInterval, offset);
+            offset += 2;
+            _data.WriteS64(LastInteractionTime, offset);
+            offset += 8;
             return offset - initialOffset;
         }
 
@@ -115,45 +145,41 @@ namespace Frontier.Types
         {
             int offset = initialOffset;
             result = new StructureStats();
-            result.Health = _data.GetU32(offset);
-            offset += 4;
-            result.Attack = _data.GetU32(offset);
-            offset += 4;
-            result.Defense = _data.GetU32(offset);
-            offset += 4;
-            result.Speed = _data.GetU32(offset);
-            offset += 4;
-            result.Range = _data.GetU32(offset);
-            offset += 4;
-            result.Cost = _data.GetU32(offset);
-            offset += 4;
-            result.Upkeep = _data.GetU32(offset);
-            offset += 4;
-            result.BuildTime = _data.GetU32(offset);
-            offset += 4;
-            result.Level = _data.GetU32(offset);
-            offset += 4;
-            result.Experience = _data.GetU32(offset);
-            offset += 4;
-            result.ExperienceToLevel = _data.GetU32(offset);
-            offset += 4;
+            result.Rank = _data.GetU16(offset);
+            offset += 2;
+            result.Health = _data.GetU16(offset);
+            offset += 2;
+            result.Attack = _data.GetU16(offset);
+            offset += 2;
+            result.Defense = _data.GetU16(offset);
+            offset += 2;
+            result.Speed = _data.GetU16(offset);
+            offset += 2;
+            result.Range = _data.GetU16(offset);
+            offset += 2;
+            result.AssignedWorkers = _data.GetU8(offset);
+            offset += 1;
+            result.CollectionInterval = _data.GetU16(offset);
+            offset += 2;
+            result.LastInteractionTime = _data.GetS64(offset);
+            offset += 8;
             return offset - initialOffset;
         }
     }
 
     public partial class Position
     {
-        public uint X { get; set; }
+        public ushort X { get; set; }
 
-        public uint Y { get; set; }
+        public ushort Y { get; set; }
 
         public int Serialize(byte[] _data, int initialOffset)
         {
             int offset = initialOffset;
-            _data.WriteU32(X, offset);
-            offset += 4;
-            _data.WriteU32(Y, offset);
-            offset += 4;
+            _data.WriteU16(X, offset);
+            offset += 2;
+            _data.WriteU16(Y, offset);
+            offset += 2;
             return offset - initialOffset;
         }
 
@@ -161,11 +187,28 @@ namespace Frontier.Types
         {
             int offset = initialOffset;
             result = new Position();
-            result.X = _data.GetU32(offset);
-            offset += 4;
-            result.Y = _data.GetU32(offset);
-            offset += 4;
+            result.X = _data.GetU16(offset);
+            offset += 2;
+            result.Y = _data.GetU16(offset);
+            offset += 2;
             return offset - initialOffset;
         }
+    }
+
+    public enum StructureType : byte
+    {
+        ThroneHall,
+        Barracks,
+        Blacksmith,
+        ManaWell,
+        CarpenterHut,
+        PvpPortal,
+        Mine,
+        Quarry,
+        LumberMill,
+        ArcherTower,
+        MageTower,
+        Wall,
+        SentryCreature
     }
 }

@@ -1,6 +1,7 @@
 ﻿using Frontier.Accounts;
 using Frontier.Errors;
 using Frontier.Program;
+using Frontier.Types;
 using Solnet.Programs.Abstract;
 using Solnet.Programs.Models;
 using Solnet.Rpc;
@@ -20,7 +21,7 @@ namespace Frontier
 
         public async Task<ProgramAccountsResultWrapper<List<Army>>> GetArmysAsync(string programAddress, Commitment commitment = Commitment.Finalized)
         {
-            var list = new List<MemCmp> { new MemCmp { Bytes = Army.EncodedAccountId, Offset = 0 } };
+            var list = new List<MemCmp> { new MemCmp { Bytes = Army.EncodedAccID, Offset = 0 } };
             var res = await RpcClient.GetProgramAccountsAsync(programAddress, commitment, memCmpList: list);
             if (!res.WasSuccessful || !(res.Result?.Count > 0))
                 return new ProgramAccountsResultWrapper<List<Army>>(res);
@@ -32,7 +33,7 @@ namespace Frontier
 
         public async Task<ProgramAccountsResultWrapper<List<PlayerBase>>> GetPlayerBasesAsync(string programAddress, Commitment commitment = Commitment.Finalized)
         {
-            var list = new List<MemCmp> { new MemCmp { Bytes = PlayerBase.EncodedAccountId, Offset = 0 } };
+            var list = new List<MemCmp> { new MemCmp { Bytes = PlayerBase.EncodedAccID, Offset = 0 } };
             var res = await RpcClient.GetProgramAccountsAsync(programAddress, commitment, memCmpList: list);
             if (!res.WasSuccessful || !(res.Result?.Count > 0))
                 return new ProgramAccountsResultWrapper<List<PlayerBase>>(res);
@@ -44,7 +45,7 @@ namespace Frontier
 
         public async Task<ProgramAccountsResultWrapper<List<Player>>> GetPlayersAsync(string programAddress, Commitment commitment = Commitment.Finalized)
         {
-            var list = new List<MemCmp> { new MemCmp { Bytes = Player.EncodedAccountId, Offset = 0 } };
+            var list = new List<MemCmp> { new MemCmp { Bytes = Player.EncodedAccID, Offset = 0 } };
             var res = await RpcClient.GetProgramAccountsAsync(programAddress, commitment, memCmpList: list);
             if (!res.WasSuccessful || !(res.Result?.Count > 0))
                 return new ProgramAccountsResultWrapper<List<Player>>(res);
@@ -56,7 +57,7 @@ namespace Frontier
 
         public async Task<ProgramAccountsResultWrapper<List<Structure>>> GetStructuresAsync(string programAddress, Commitment commitment = Commitment.Finalized)
         {
-            var list = new List<MemCmp> { new MemCmp { Bytes = Structure.EncodedAccountId, Offset = 0 } };
+            var list = new List<MemCmp> { new MemCmp { Bytes = Structure.EncodedAccID, Offset = 0 } };
             var res = await RpcClient.GetProgramAccountsAsync(programAddress, commitment, memCmpList: list);
             if (!res.WasSuccessful || !(res.Result?.Count > 0))
                 return new ProgramAccountsResultWrapper<List<Structure>>(res);
@@ -160,9 +161,15 @@ namespace Frontier
             return await SignAndSendTransaction(instr, feePayer, signingCallback);
         }
 
-        public async Task<RequestResult<string>> SendBuildStructureAsync(BuildStructureAccounts accounts, uint structureCount, uint structureType, PublicKey feePayer, Func<byte[], PublicKey, byte[]> signingCallback, PublicKey programId)
+        public async Task<RequestResult<string>> SendBuildStructureAsync(BuildStructureAccounts accounts, uint structureCount, StructureType structureType, Position position, PublicKey feePayer, Func<byte[], PublicKey, byte[]> signingCallback, PublicKey programId)
         {
-            TransactionInstruction instr = FrontierProgram.BuildStructure(accounts, structureCount, structureType, programId);
+            TransactionInstruction instr = FrontierProgram.BuildStructure(accounts, structureCount, structureType, position, programId);
+            return await SignAndSendTransaction(instr, feePayer, signingCallback);
+        }
+
+        public async Task<RequestResult<string>> SendCollectResourcesAsync(CollectResourcesAccounts accounts, uint structureCount, PublicKey feePayer, Func<byte[], PublicKey, byte[]> signingCallback, PublicKey programId)
+        {
+            TransactionInstruction instr = FrontierProgram.CollectResources(accounts, structureCount, programId);
             return await SignAndSendTransaction(instr, feePayer, signingCallback);
         }
 
