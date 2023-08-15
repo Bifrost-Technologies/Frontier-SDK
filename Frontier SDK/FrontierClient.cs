@@ -20,10 +20,11 @@ namespace Frontier
 
         public async Task<ProgramAccountsResultWrapper<List<Army>>> GetArmysAsync(string programAddress, Commitment commitment = Commitment.Finalized)
         {
-            var list = new List<MemCmp> { new MemCmp { Bytes = Army.ACCOUNT_DISCRIMINATOR_B58, Offset = 0 } };
+            var list = new List<MemCmp> { new MemCmp { Bytes = Army.EncodedAccountId, Offset = 0 } };
             var res = await RpcClient.GetProgramAccountsAsync(programAddress, commitment, memCmpList: list);
             if (!res.WasSuccessful || !(res.Result?.Count > 0))
                 return new ProgramAccountsResultWrapper<List<Army>>(res);
+
             List<Army> resultingAccounts = new List<Army>(res.Result.Count);
             resultingAccounts.AddRange(res.Result.Select(result => Army.Deserialize(Convert.FromBase64String(result.Account.Data[0]))));
             return new ProgramAccountsResultWrapper<List<Army>>(res, resultingAccounts);
@@ -31,10 +32,11 @@ namespace Frontier
 
         public async Task<ProgramAccountsResultWrapper<List<PlayerBase>>> GetPlayerBasesAsync(string programAddress, Commitment commitment = Commitment.Finalized)
         {
-            var list = new List<MemCmp> { new MemCmp { Bytes = PlayerBase.ACCOUNT_DISCRIMINATOR_B58, Offset = 0 } };
+            var list = new List<MemCmp> { new MemCmp { Bytes = PlayerBase.EncodedAccountId, Offset = 0 } };
             var res = await RpcClient.GetProgramAccountsAsync(programAddress, commitment, memCmpList: list);
             if (!res.WasSuccessful || !(res.Result?.Count > 0))
                 return new ProgramAccountsResultWrapper<List<PlayerBase>>(res);
+
             List<PlayerBase> resultingAccounts = new List<PlayerBase>(res.Result.Count);
             resultingAccounts.AddRange(res.Result.Select(result => PlayerBase.Deserialize(Convert.FromBase64String(result.Account.Data[0]))));
             return new ProgramAccountsResultWrapper<List<PlayerBase>>(res, resultingAccounts);
@@ -42,10 +44,11 @@ namespace Frontier
 
         public async Task<ProgramAccountsResultWrapper<List<Player>>> GetPlayersAsync(string programAddress, Commitment commitment = Commitment.Finalized)
         {
-            var list = new List<MemCmp> { new MemCmp { Bytes = Player.ACCOUNT_DISCRIMINATOR_B58, Offset = 0 } };
+            var list = new List<MemCmp> { new MemCmp { Bytes = Player.EncodedAccountId, Offset = 0 } };
             var res = await RpcClient.GetProgramAccountsAsync(programAddress, commitment, memCmpList: list);
             if (!res.WasSuccessful || !(res.Result?.Count > 0))
                 return new ProgramAccountsResultWrapper<List<Player>>(res);
+
             List<Player> resultingAccounts = new List<Player>(res.Result.Count);
             resultingAccounts.AddRange(res.Result.Select(result => Player.Deserialize(Convert.FromBase64String(result.Account.Data[0]))));
             return new ProgramAccountsResultWrapper<List<Player>>(res, resultingAccounts);
@@ -53,10 +56,11 @@ namespace Frontier
 
         public async Task<ProgramAccountsResultWrapper<List<Structure>>> GetStructuresAsync(string programAddress, Commitment commitment = Commitment.Finalized)
         {
-            var list = new List<MemCmp> { new MemCmp { Bytes = Structure.ACCOUNT_DISCRIMINATOR_B58, Offset = 0 } };
+            var list = new List<MemCmp> { new MemCmp { Bytes = Structure.EncodedAccountId, Offset = 0 } };
             var res = await RpcClient.GetProgramAccountsAsync(programAddress, commitment, memCmpList: list);
             if (!res.WasSuccessful || !(res.Result?.Count > 0))
                 return new ProgramAccountsResultWrapper<List<Structure>>(res);
+
             List<Structure> resultingAccounts = new List<Structure>(res.Result.Count);
             resultingAccounts.AddRange(res.Result.Select(result => Structure.Deserialize(Convert.FromBase64String(result.Account.Data[0]))));
             return new ProgramAccountsResultWrapper<List<Structure>>(res, resultingAccounts);
@@ -67,6 +71,7 @@ namespace Frontier
             var res = await RpcClient.GetAccountInfoAsync(accountAddress, commitment);
             if (!res.WasSuccessful)
                 return new AccountResultWrapper<Army>(res);
+
             var resultingAccount = Army.Deserialize(Convert.FromBase64String(res.Result.Value.Data[0]));
             return new AccountResultWrapper<Army>(res, resultingAccount);
         }
@@ -76,6 +81,7 @@ namespace Frontier
             var res = await RpcClient.GetAccountInfoAsync(accountAddress, commitment);
             if (!res.WasSuccessful)
                 return new AccountResultWrapper<PlayerBase>(res);
+
             var resultingAccount = PlayerBase.Deserialize(Convert.FromBase64String(res.Result.Value.Data[0]));
             return new AccountResultWrapper<PlayerBase>(res, resultingAccount);
         }
@@ -85,6 +91,7 @@ namespace Frontier
             var res = await RpcClient.GetAccountInfoAsync(accountAddress, commitment);
             if (!res.WasSuccessful)
                 return new AccountResultWrapper<Player>(res);
+
             var resultingAccount = Player.Deserialize(Convert.FromBase64String(res.Result.Value.Data[0]));
             return new AccountResultWrapper<Player>(res, resultingAccount);
         }
@@ -94,6 +101,7 @@ namespace Frontier
             var res = await RpcClient.GetAccountInfoAsync(accountAddress, commitment);
             if (!res.WasSuccessful)
                 return new AccountResultWrapper<Structure>(res);
+
             var resultingAccount = Structure.Deserialize(Convert.FromBase64String(res.Result.Value.Data[0]));
             return new AccountResultWrapper<Structure>(res, resultingAccount);
         }

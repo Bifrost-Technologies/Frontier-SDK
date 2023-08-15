@@ -11,9 +11,9 @@ namespace Frontier.Accounts
 {
         public partial class Army
         {
-            public static ulong ACCOUNT_DISCRIMINATOR => 16876076247667461172UL;
-            public static ReadOnlySpan<byte> ACCOUNT_DISCRIMINATOR_BYTES => new byte[]{52, 76, 160, 24, 239, 221, 51, 234};
-            public static string ACCOUNT_DISCRIMINATOR_B58 => "9kNPy72CECH";
+            public static ulong AccountId => 16876076247667461172UL;
+            public static ReadOnlySpan<byte> AccountIdBytes => new byte[]{52, 76, 160, 24, 239, 221, 51, 234};
+            public static string EncodedAccountId => "9kNPy72CECH";
             public PublicKey PlayerAccount { get; set; }
 
             public uint UnitCount { get; set; }
@@ -29,7 +29,7 @@ namespace Frontier.Accounts
                 int offset = 0;
                 ulong accountHashValue = _data.GetU64(offset);
                 offset += 8;
-                if (accountHashValue != ACCOUNT_DISCRIMINATOR)
+                if (accountHashValue != AccountId)
                 {
                     return null;
                 }
@@ -51,9 +51,9 @@ namespace Frontier.Accounts
 
         public partial class PlayerBase
         {
-            public static ulong ACCOUNT_DISCRIMINATOR => 15322206904575986686UL;
-            public static ReadOnlySpan<byte> ACCOUNT_DISCRIMINATOR_BYTES => new byte[]{254, 11, 74, 202, 255, 105, 163, 212};
-            public static string ACCOUNT_DISCRIMINATOR_B58 => "jVYg4oU8vRh";
+            public static ulong AccountId => 15322206904575986686UL;
+            public static ReadOnlySpan<byte> AccountIdBytes => new byte[]{254, 11, 74, 202, 255, 105, 163, 212};
+            public static string EncodedAccountId => "jVYg4oU8vRh";
             public PublicKey PlayerAccount { get; set; }
 
             public uint StructureCount { get; set; }
@@ -71,7 +71,7 @@ namespace Frontier.Accounts
                 int offset = 0;
                 ulong accountHashValue = _data.GetU64(offset);
                 offset += 8;
-                if (accountHashValue != ACCOUNT_DISCRIMINATOR)
+                if (accountHashValue != AccountId)
                 {
                     return null;
                 }
@@ -95,9 +95,9 @@ namespace Frontier.Accounts
 
         public partial class Player
         {
-            public static ulong ACCOUNT_DISCRIMINATOR => 15766710478567431885UL;
-            public static ReadOnlySpan<byte> ACCOUNT_DISCRIMINATOR_BYTES => new byte[]{205, 222, 112, 7, 165, 155, 206, 218};
-            public static string ACCOUNT_DISCRIMINATOR_B58 => "bSBoKNsSHuj";
+            public static ulong AccountId => 15766710478567431885UL;
+            public static ReadOnlySpan<byte> AccountIdBytes => new byte[]{205, 222, 112, 7, 165, 155, 206, 218};
+            public static string EncodedAccountId => "bSBoKNsSHuj";
             public PublicKey OwnerPubkey { get; set; }
 
             public byte Rank { get; set; }
@@ -113,7 +113,7 @@ namespace Frontier.Accounts
                 int offset = 0;
                 ulong accountHashValue = _data.GetU64(offset);
                 offset += 8;
-                if (accountHashValue != ACCOUNT_DISCRIMINATOR)
+                if (accountHashValue != AccountId)
                 {
                     return null;
                 }
@@ -135,9 +135,9 @@ namespace Frontier.Accounts
 
         public partial class Structure
         {
-            public static ulong ACCOUNT_DISCRIMINATOR => 16504117151182136175UL;
-            public static ReadOnlySpan<byte> ACCOUNT_DISCRIMINATOR_BYTES => new byte[]{111, 163, 164, 63, 27, 103, 10, 229};
-            public static string ACCOUNT_DISCRIMINATOR_B58 => "Kg3LfHYE7K2";
+            public static ulong AccountId => 16504117151182136175UL;
+            public static ReadOnlySpan<byte> AccountIdBytes => new byte[]{111, 163, 164, 63, 27, 103, 10, 229};
+            public static string EncodedAccountId => "Kg3LfHYE7K2";
             public uint Id { get; set; }
 
             public PublicKey PlayerBase { get; set; }
@@ -159,7 +159,7 @@ namespace Frontier.Accounts
                 int offset = 0;
                 ulong accountHashValue = _data.GetU64(offset);
                 offset += 8;
-                if (accountHashValue != ACCOUNT_DISCRIMINATOR)
+                if (accountHashValue != AccountId)
                 {
                     return null;
                 }
