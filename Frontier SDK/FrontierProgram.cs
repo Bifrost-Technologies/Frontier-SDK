@@ -18,12 +18,14 @@ using Frontier.Program;
 using Frontier.Errors;
 using Frontier.Accounts;
 using Frontier.Types;
+//using UnrealEngine.Framework;
 
     namespace Frontier.Program
 {
     public static class FrontierProgram
     {
-        public static TransactionInstruction InitPlayerAccounts(InitPlayerAccountsAccounts accounts, PublicKey programId)
+        public static PublicKey FrontierProgramAddress = new PublicKey("");
+        public static TransactionInstruction InitPlayerAccounts(InitPlayerAccountsAccounts accounts)
         {
             List<AccountMeta> keys = new()
                 {AccountMeta.Writable(accounts.Owner, true), AccountMeta.Writable(accounts.PlayerAccount, false), AccountMeta.Writable(accounts.BaseAccount, false), AccountMeta.Writable(accounts.ArmyAccount, false), AccountMeta.ReadOnly(accounts.SystemProgram, false)};
@@ -33,10 +35,10 @@ using Frontier.Types;
             offset += 8;
             byte[] resultData = new byte[offset];
             Array.Copy(_data, resultData, offset);
-            return new TransactionInstruction { Keys = keys, ProgramId = programId.KeyBytes, Data = resultData };
+            return new TransactionInstruction { Keys = keys, ProgramId = FrontierProgramAddress.KeyBytes, Data = resultData };
         }
 
-        public static TransactionInstruction BuildStructure(BuildStructureAccounts accounts, uint structureCount, StructureType structureType, Position position, PublicKey programId)
+        public static TransactionInstruction BuildStructure(BuildStructureAccounts accounts, uint structureCount, StructureType structureType, Position position)
         {
             List<AccountMeta> keys = new()
                 {AccountMeta.Writable(accounts.Owner, true), AccountMeta.Writable(accounts.PlayerAccount, false), AccountMeta.Writable(accounts.BaseAccount, false), AccountMeta.Writable(accounts.StructureAccount, false), AccountMeta.ReadOnly(accounts.SystemProgram, false)};
@@ -51,10 +53,10 @@ using Frontier.Types;
             offset += position.Serialize(_data, offset);
             byte[] resultData = new byte[offset];
             Array.Copy(_data, resultData, offset);
-            return new TransactionInstruction { Keys = keys, ProgramId = programId.KeyBytes, Data = resultData };
+            return new TransactionInstruction { Keys = keys, ProgramId = FrontierProgramAddress.KeyBytes, Data = resultData };
         }
 
-        public static TransactionInstruction CollectResources(CollectResourcesAccounts accounts, uint structureCount, PublicKey programId)
+        public static TransactionInstruction CollectResources(CollectResourcesAccounts accounts, uint structureCount)
         {
             List<AccountMeta> keys = new()
                 {AccountMeta.Writable(accounts.Owner, true), AccountMeta.Writable(accounts.PlayerAccount, false), AccountMeta.Writable(accounts.BaseAccount, false), AccountMeta.Writable(accounts.StructureAccount, false)};
@@ -66,7 +68,7 @@ using Frontier.Types;
             offset += 4;
             byte[] resultData = new byte[offset];
             Array.Copy(_data, resultData, offset);
-            return new TransactionInstruction { Keys = keys, ProgramId = programId.KeyBytes, Data = resultData };
+            return new TransactionInstruction { Keys = keys, ProgramId = FrontierProgramAddress.KeyBytes, Data = resultData };
         }
     }
 }

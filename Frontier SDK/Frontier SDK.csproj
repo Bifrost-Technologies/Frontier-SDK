@@ -1,18 +1,36 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net7.0</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
     <RootNamespace>Frontier</RootNamespace>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Solnet.Extensions" Version="6.1.0" />
-    <PackageReference Include="Solnet.KeyStore" Version="6.1.0" />
-    <PackageReference Include="Solnet.Programs" Version="6.1.0" />
-    <PackageReference Include="Solnet.Rpc" Version="6.1.0" />
-    <PackageReference Include="Solnet.Wallet" Version="6.1.0" />
+    <PackageReference Include="Microsoft.AspNetCore.DataProtection" Version="7.0.10" />
+    <PackageReference Include="Microsoft.AspNetCore.DataProtection.Extensions" Version="7.0.10" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="Solnet.Extensions">
+      <HintPath>..\..\Bifrost.Solnet\src\Solnet.Extensions\bin\Debug\net6.0\Solnet.Extensions.dll</HintPath>
+    </Reference>
+    <Reference Include="Solnet.KeyStore">
+      <HintPath>..\..\Bifrost.Solnet\src\Solnet.KeyStore\bin\Debug\net6.0\Solnet.KeyStore.dll</HintPath>
+    </Reference>
+    <Reference Include="Solnet.Programs">
+      <HintPath>..\..\Bifrost.Solnet\src\Solnet.Programs\bin\Debug\net6.0\Solnet.Programs.dll</HintPath>
+    </Reference>
+    <Reference Include="Solnet.Rpc">
+      <HintPath>..\..\Bifrost.Solnet\src\Solnet.Rpc\bin\Debug\net6.0\Solnet.Rpc.dll</HintPath>
+    </Reference>
+    <Reference Include="Solnet.Wallet">
+      <HintPath>..\..\Bifrost.Solnet\src\Solnet.Wallet\bin\Debug\net6.0\Solnet.Wallet.dll</HintPath>
+    </Reference>
+    <Reference Include="UnrealEngine.Framework">
+      <HintPath>D:\Unreal Projects\Frontiers\Managed\UnrealEngine.Framework.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
 </Project>
