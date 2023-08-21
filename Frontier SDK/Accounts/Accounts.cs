@@ -16,11 +16,13 @@ namespace Frontier.Accounts
         public static string EncodedAccID => "9kNPy72CECH";
         public PublicKey PlayerAccount { get; set; }
 
-        public uint UnitCount { get; set; }
-
         public uint ArmySize { get; set; }
 
+        public uint ArmyMaxSize { get; set; }
+
         public uint Rating { get; set; }
+
+        public FactionType Faction { get; set; }
 
         public bool IsInitialized { get; set; }
 
@@ -37,12 +39,74 @@ namespace Frontier.Accounts
             Army result = new Army();
             result.PlayerAccount = _data.GetPubKey(offset);
             offset += 32;
-            result.UnitCount = _data.GetU32(offset);
-            offset += 4;
             result.ArmySize = _data.GetU32(offset);
+            offset += 4;
+            result.ArmyMaxSize = _data.GetU32(offset);
             offset += 4;
             result.Rating = _data.GetU32(offset);
             offset += 4;
+            result.Faction = (FactionType)_data.GetU8(offset);
+            offset += 1;
+            result.IsInitialized = _data.GetBool(offset);
+            offset += 1;
+            return result;
+        }
+    }
+
+    public partial class GameMatch
+    {
+        public static ulong AccID => 2846051679389268823UL;
+        public static ReadOnlySpan<byte> AccIDbytes => new byte[] { 87, 187, 102, 98, 236, 52, 127, 39 };
+        public static string EncodedAccID => "Fg7R48zaW22";
+        public uint Id { get; set; }
+
+        public MatchState State { get; set; }
+
+        public uint ActiveUnits { get; set; }
+
+        public uint ActiveStructures { get; set; }
+
+        public bool ThroneHallActive { get; set; }
+
+        public Victor Victor { get; set; }
+
+        public Resources MatchReward { get; set; }
+
+        public PublicKey AttackingArmy { get; set; }
+
+        public PublicKey DefendingBase { get; set; }
+
+        public bool IsInitialized { get; set; }
+
+        public static GameMatch Deserialize(ReadOnlySpan<byte> _data)
+        {
+            int offset = 0;
+            ulong accountHashValue = _data.GetU64(offset);
+            offset += 8;
+            if (accountHashValue != AccID)
+            {
+                return null;
+            }
+
+            GameMatch result = new GameMatch();
+            result.Id = _data.GetU32(offset);
+            offset += 4;
+            result.State = (MatchState)_data.GetU8(offset);
+            offset += 1;
+            result.ActiveUnits = _data.GetU32(offset);
+            offset += 4;
+            result.ActiveStructures = _data.GetU32(offset);
+            offset += 4;
+            result.ThroneHallActive = _data.GetBool(offset);
+            offset += 1;
+            result.Victor = (Victor)_data.GetU8(offset);
+            offset += 1;
+            offset += Resources.Deserialize(_data, offset, out var resultMatchReward);
+            result.MatchReward = resultMatchReward;
+            result.AttackingArmy = _data.GetPubKey(offset);
+            offset += 32;
+            result.DefendingBase = _data.GetPubKey(offset);
+            offset += 32;
             result.IsInitialized = _data.GetBool(offset);
             offset += 1;
             return result;
@@ -62,7 +126,11 @@ namespace Frontier.Accounts
 
         public uint MaxBaseSize { get; set; }
 
-        public uint Rating { get; set; }
+        public uint MaxWorkers { get; set; }
+
+        public ushort Rating { get; set; }
+
+        public FactionType Faction { get; set; }
 
         public bool IsInitialized { get; set; }
 
@@ -85,8 +153,12 @@ namespace Frontier.Accounts
             offset += 4;
             result.MaxBaseSize = _data.GetU32(offset);
             offset += 4;
-            result.Rating = _data.GetU32(offset);
+            result.MaxWorkers = _data.GetU32(offset);
             offset += 4;
+            result.Rating = _data.GetU16(offset);
+            offset += 2;
+            result.Faction = (FactionType)_data.GetU8(offset);
+            offset += 1;
             result.IsInitialized = _data.GetBool(offset);
             offset += 1;
             return result;
@@ -105,6 +177,8 @@ namespace Frontier.Accounts
         public uint Experience { get; set; }
 
         public Resources Resources { get; set; }
+
+        public FactionType Faction { get; set; }
 
         public bool IsInitialized { get; set; }
 
@@ -127,6 +201,52 @@ namespace Frontier.Accounts
             offset += 4;
             offset += Resources.Deserialize(_data, offset, out var resultResources);
             result.Resources = resultResources;
+            result.Faction = (FactionType)_data.GetU8(offset);
+            offset += 1;
+            result.IsInitialized = _data.GetBool(offset);
+            offset += 1;
+            return result;
+        }
+    }
+
+    public partial class Season
+    {
+        public static ulong AccID => 3456686113049887564UL;
+        public static ReadOnlySpan<byte> AccIDbytes => new byte[] { 76, 67, 93, 156, 180, 157, 248, 47 };
+        public static string EncodedAccID => "DkrBsPxjgBp";
+        public uint SeasonId { get; set; }
+
+        public PublicKey SeasonInitializer { get; set; }
+
+        public uint MatchCount { get; set; }
+
+        public uint PlayerCount { get; set; }
+
+        public SeasonState State { get; set; }
+
+        public bool IsInitialized { get; set; }
+
+        public static Season Deserialize(ReadOnlySpan<byte> _data)
+        {
+            int offset = 0;
+            ulong accountHashValue = _data.GetU64(offset);
+            offset += 8;
+            if (accountHashValue != AccID)
+            {
+                return null;
+            }
+
+            Season result = new Season();
+            result.SeasonId = _data.GetU32(offset);
+            offset += 4;
+            result.SeasonInitializer = _data.GetPubKey(offset);
+            offset += 32;
+            result.MatchCount = _data.GetU32(offset);
+            offset += 4;
+            result.PlayerCount = _data.GetU32(offset);
+            offset += 4;
+            result.State = (SeasonState)_data.GetU8(offset);
+            offset += 1;
             result.IsInitialized = _data.GetBool(offset);
             offset += 1;
             return result;
@@ -149,6 +269,8 @@ namespace Frontier.Accounts
         public StructureStats Stats { get; set; }
 
         public Position Position { get; set; }
+
+        public bool IsDestroyed { get; set; }
 
         public bool IsInitialized { get; set; }
 
@@ -175,6 +297,56 @@ namespace Frontier.Accounts
             result.Stats = resultStats;
             offset += Position.Deserialize(_data, offset, out var resultPosition);
             result.Position = resultPosition;
+            result.IsDestroyed = _data.GetBool(offset);
+            offset += 1;
+            result.IsInitialized = _data.GetBool(offset);
+            offset += 1;
+            return result;
+        }
+    }
+
+    public partial class Unit
+    {
+        public static ulong AccID => 1207677667194103049UL;
+        public static ReadOnlySpan<byte> AccIDbytes => new byte[] { 9, 229, 70, 148, 112, 136, 194, 16 };
+        public static string EncodedAccID => "2ezzK5jZAS3";
+        public uint Id { get; set; }
+
+        public PublicKey Player { get; set; }
+
+        public PublicKey Army { get; set; }
+
+        public UnitType UnitType { get; set; }
+
+        public UnitStats Stats { get; set; }
+
+        public bool IsDestroyed { get; set; }
+
+        public bool IsInitialized { get; set; }
+
+        public static Unit Deserialize(ReadOnlySpan<byte> _data)
+        {
+            int offset = 0;
+            ulong accountHashValue = _data.GetU64(offset);
+            offset += 8;
+            if (accountHashValue != AccID)
+            {
+                return null;
+            }
+
+            Unit result = new Unit();
+            result.Id = _data.GetU32(offset);
+            offset += 4;
+            result.Player = _data.GetPubKey(offset);
+            offset += 32;
+            result.Army = _data.GetPubKey(offset);
+            offset += 32;
+            result.UnitType = (UnitType)_data.GetU8(offset);
+            offset += 1;
+            offset += UnitStats.Deserialize(_data, offset, out var resultStats);
+            result.Stats = resultStats;
+            result.IsDestroyed = _data.GetBool(offset);
+            offset += 1;
             result.IsInitialized = _data.GetBool(offset);
             offset += 1;
             return result;

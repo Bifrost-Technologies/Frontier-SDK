@@ -9,6 +9,8 @@ using UnrealEngine.Framework;
 using Frontier.Types;
 using Frontier.Wallet;
 using Frontier.Utilities;
+using Solnet.Extensions;
+using Solnet.Wallet;
 
 namespace Frontier
 {
@@ -16,49 +18,66 @@ namespace Frontier
     {
         public static FrontierChainClient ChainClient { get; set; }
 
-        private static FrontierGameWallet AirlockWallet { get; set; }
+        public static FrontierGameWallet AirlockWallet { get; set; }
 
-        public static string InitializeChainClient()
+        public static Sequencer PacketChamber { get; set; }
+
+       
+        public static string InitializeChainClient(string password)
         {
             var rpc1 = ClientFactory.GetClient("https://stylish-crimson-tent.solana-mainnet.discover.quiknode.pro/dd0b3cd0bc4d3cbac5924a139c81e54e03404079/");
             var rpc2 = ClientFactory.GetStreamingClient("wss://stylish-crimson-tent.solana-mainnet.discover.quiknode.pro/dd0b3cd0bc4d3cbac5924a139c81e54e03404079/");
-            ChainClient = new FrontierChainClient(rpc1, rpc2, FrontierProgram.FrontierProgramAddress);
-           // Debug.Log(LogLevel.Warning, "Solana RPC client is initialized!");
-            return "Solana RPC client is initialized!";
-        }
-        public static async void TestFrontierProgram()
-        {
+            ChainClient = new FrontierChainClient(rpc1, rpc2, FrontierProgram.ProgramAddress);
+            AirlockWallet = new FrontierGameWallet(password);
+            PacketChamber = new Sequencer();
             try
             {
-                InitPlayerAccountsAccounts Player = new InitPlayerAccountsAccounts
-                {
-                    Owner = AirlockWallet.playerAddress,
-                    PlayerAccount = PDALookup.FindPlayerPDA(AirlockWallet.playerAddress),
-                    BaseAccount = PDALookup.FindKingdomPDA(AirlockWallet.playerAddress),
-                    ArmyAccount = PDALookup.FindArmyPDA(AirlockWallet.playerAddress)
-                };
-              var initPlayer =  await ChainClient.InitPlayerAccountsInstruction(Player);
-
-               await ChainClient.RpcClient.SendTransactionAsync(initPlayer);
-               // Debug.Log(LogLevel.Warning, "Testing frontier program...");
-                var atest = await ChainClient.GetPlayersAsync();
-          
-                if (atest != null && atest.ParsedResult != null)
-                {
-                    var players = atest.ParsedResult;
-                    foreach (var _player in players)
-                    {
-                       // Debug.Log(LogLevel.Warning, "Player Owner: " + _player.OwnerPubkey);
-                      //  Debug.Log(LogLevel.Warning, "Player Rank:" + _player.Rank);
-                    }
-                }
+                AirlockWallet.tokenWallet = TokenWallet.Load(ChainClient.RpcClient, AirlockWallet.tokenMintDatabase, AirlockWallet.playerAddress);
             }
-            catch (Exception ex)
+            catch (Exception ex) 
             {
-               // Debug.Log(LogLevel.Warning, ex.Message);
+                Debug.Log(LogLevel.Warning, ex.Message);
             }
-           
+            Debug.Log(LogLevel.Warning, "Game Chain Client is initialized!");
+            return "Game Chain Client is initialized!";
         }
+        public static void RetrieveUpdatedWalletBalance()
+        {
+            AirlockWallet.tokenWallet = TokenWallet.Load(ChainClient.RpcClient, AirlockWallet.tokenMintDatabase, AirlockWallet.playerAddress);
+            AirlockWallet.UpdateBalance(AirlockWallet.tokenWallet.Sol);
+        }
+        public static async Task RailGun()
+        {
+           if (PacketChamber != null && PacketChamber.ToArray().Count() > 0)
+           {
+               int delay = 200;
+               if(PacketChamber.Count() > 5)
+                   delay = 50;
+               foreach (var tpkt in PacketChamber)
+               {
+                    await ChainClient.RpcClient.SendTransactionAsync(tpkt.signedTransaction, commitment: Solnet.Rpc.Types.Commitment.Confirmed);
+                    Debug.Log(LogLevel.Warning, "Sending a game transaction! - " + Convert.ToBase64String(tpkt.signedTransaction));
+                    await Task.Delay(delay);
+               }
+           }
+        }
+        public static void OnWorldBegin()
+        {
 
+        }
+        public static void OnWorldPostBegin()
+        {
+            
+        }
+        public static void OnWorldEnd()
+        {
+
+        }
+        //Client transaction railgun
+        public static void OnWorldDuringPhysicsTick(float deltaTime)
+        {
+           RailGun().Wait();
+        }
     }
+   
 }

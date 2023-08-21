@@ -1,5 +1,7 @@
 ﻿using Frontier.Security;
 using Microsoft.AspNetCore.DataProtection;
+using Solnet.Extensions;
+using Solnet.Rpc.Models;
 using Solnet.Wallet;
 using System;
 using System.Collections.Generic;
@@ -20,10 +22,31 @@ namespace Frontier.Wallet
         public decimal Balance { get; set; }
 
         public bool freshWallet { get; set; }
-
+        public TokenMintResolver tokenMintDatabase { get; set; }
+        public TokenWallet tokenWallet { get; set; }
         public FrontierGameWallet(string password) 
         {
             playerTitan = new Titan(password);
+            try
+            {
+                tokenMintDatabase = TokenMintResolver.Load();
+            }catch(Exception ex) 
+            {
+                UnrealEngine.Framework.Debug.Log(LogLevel.Warning, ex.Message);
+            }
+           
+        }
+        public byte[] SignMessage(byte[] transactionMessage)
+        {
+            //For extra layer of security scanning transaction messages before signing can be added
+            //...
+            //..
+            Account _account = Account.FromSecretKey(playerTitan.Shield.Unprotect(sessionKey));
+            return _account.Sign(transactionMessage);
+        }
+        public void UpdateBalance(decimal _balance)
+        {
+           Balance = _balance;
         }
         public void CreateWallet()
         {

@@ -13,6 +13,7 @@ using Solnet.Rpc.Models;
 using Solnet.Rpc.Types;
 using Solnet.Wallet;
 using UnrealEngine.Framework;
+using Player = Frontier.Accounts.Player;
 
 namespace Frontier
 {
@@ -23,55 +24,81 @@ namespace Frontier
         {
             programAddress = programId.Key.ToString();
         }
-
-
-        public async Task<ProgramAccountsResultWrapper<List<Army>>> GetArmysAsync( Commitment commitment = Commitment.Finalized)
+        public async Task<ProgramAccountsResultWrapper<List<Army>>> GetArmysAsync(string programAddress, Commitment commitment = Commitment.Finalized)
         {
             var list = new List<MemCmp> { new MemCmp { Bytes = Army.EncodedAccID, Offset = 0 } };
             var res = await RpcClient.GetProgramAccountsAsync(programAddress, commitment, memCmpList: list);
             if (!res.WasSuccessful || !(res.Result?.Count > 0))
                 return new ProgramAccountsResultWrapper<List<Army>>(res);
-
             List<Army> resultingAccounts = new List<Army>(res.Result.Count);
             resultingAccounts.AddRange(res.Result.Select(result => Army.Deserialize(Convert.FromBase64String(result.Account.Data[0]))));
             return new ProgramAccountsResultWrapper<List<Army>>(res, resultingAccounts);
         }
 
-        public async Task<ProgramAccountsResultWrapper<List<PlayerBase>>> GetPlayerBasesAsync( Commitment commitment = Commitment.Finalized)
+        public async Task<ProgramAccountsResultWrapper<List<GameMatch>>> GetGameMatchsAsync(string programAddress, Commitment commitment = Commitment.Finalized)
+        {
+            var list = new List<MemCmp> { new MemCmp { Bytes = GameMatch.EncodedAccID, Offset = 0 } };
+            var res = await RpcClient.GetProgramAccountsAsync(programAddress, commitment, memCmpList: list);
+            if (!res.WasSuccessful || !(res.Result?.Count > 0))
+                return new ProgramAccountsResultWrapper<List<GameMatch>>(res);
+            List<GameMatch> resultingAccounts = new List<GameMatch>(res.Result.Count);
+            resultingAccounts.AddRange(res.Result.Select(result => GameMatch.Deserialize(Convert.FromBase64String(result.Account.Data[0]))));
+            return new ProgramAccountsResultWrapper<List<GameMatch>>(res, resultingAccounts);
+        }
+
+        public async Task<ProgramAccountsResultWrapper<List<PlayerBase>>> GetPlayerBasesAsync(string programAddress, Commitment commitment = Commitment.Finalized)
         {
             var list = new List<MemCmp> { new MemCmp { Bytes = PlayerBase.EncodedAccID, Offset = 0 } };
             var res = await RpcClient.GetProgramAccountsAsync(programAddress, commitment, memCmpList: list);
             if (!res.WasSuccessful || !(res.Result?.Count > 0))
                 return new ProgramAccountsResultWrapper<List<PlayerBase>>(res);
-
             List<PlayerBase> resultingAccounts = new List<PlayerBase>(res.Result.Count);
             resultingAccounts.AddRange(res.Result.Select(result => PlayerBase.Deserialize(Convert.FromBase64String(result.Account.Data[0]))));
             return new ProgramAccountsResultWrapper<List<PlayerBase>>(res, resultingAccounts);
         }
 
-        public async Task<ProgramAccountsResultWrapper<List<Accounts.Player>>> GetPlayersAsync( Commitment commitment = Commitment.Finalized)
+        public async Task<ProgramAccountsResultWrapper<List<Player>>> GetPlayersAsync(string programAddress, Commitment commitment = Commitment.Finalized)
         {
-            var list = new List<MemCmp> { new MemCmp { Bytes = Accounts.Player.EncodedAccID, Offset = 0 } };
+            var list = new List<MemCmp> { new MemCmp { Bytes = Player.EncodedAccID, Offset = 0 } };
             var res = await RpcClient.GetProgramAccountsAsync(programAddress, commitment, memCmpList: list);
-            Debug.Log(LogLevel.Warning, "Did getPlayers work? " + res.WasSuccessful + " | " + res.Result.Count());
             if (!res.WasSuccessful || !(res.Result?.Count > 0))
-                return new ProgramAccountsResultWrapper<List<Accounts.Player>>(res);
-
-            List<Accounts.Player> resultingAccounts = new List<Accounts.Player>(res.Result.Count);
-            resultingAccounts.AddRange(res.Result.Select(result => Accounts.Player.Deserialize(Convert.FromBase64String(result.Account.Data[0]))));
-            return new ProgramAccountsResultWrapper<List<Accounts.Player>>(res, resultingAccounts);
+                return new ProgramAccountsResultWrapper<List<Player>>(res);
+            List<Player> resultingAccounts = new List<Player>(res.Result.Count);
+            resultingAccounts.AddRange(res.Result.Select(result => Player.Deserialize(Convert.FromBase64String(result.Account.Data[0]))));
+            return new ProgramAccountsResultWrapper<List<Player>>(res, resultingAccounts);
         }
 
-        public async Task<ProgramAccountsResultWrapper<List<Structure>>> GetStructuresAsync( Commitment commitment = Commitment.Finalized)
+        public async Task<ProgramAccountsResultWrapper<List<Season>>> GetSeasonsAsync(string programAddress, Commitment commitment = Commitment.Finalized)
+        {
+            var list = new List<MemCmp> { new MemCmp { Bytes = Season.EncodedAccID, Offset = 0 } };
+            var res = await RpcClient.GetProgramAccountsAsync(programAddress, commitment, memCmpList: list);
+            if (!res.WasSuccessful || !(res.Result?.Count > 0))
+                return new ProgramAccountsResultWrapper<List<Season>>(res);
+            List<Season> resultingAccounts = new List<Season>(res.Result.Count);
+            resultingAccounts.AddRange(res.Result.Select(result => Season.Deserialize(Convert.FromBase64String(result.Account.Data[0]))));
+            return new ProgramAccountsResultWrapper<List<Season>>(res, resultingAccounts);
+        }
+
+        public async Task<ProgramAccountsResultWrapper<List<Structure>>> GetStructuresAsync(string programAddress, Commitment commitment = Commitment.Finalized)
         {
             var list = new List<MemCmp> { new MemCmp { Bytes = Structure.EncodedAccID, Offset = 0 } };
             var res = await RpcClient.GetProgramAccountsAsync(programAddress, commitment, memCmpList: list);
             if (!res.WasSuccessful || !(res.Result?.Count > 0))
                 return new ProgramAccountsResultWrapper<List<Structure>>(res);
-
             List<Structure> resultingAccounts = new List<Structure>(res.Result.Count);
             resultingAccounts.AddRange(res.Result.Select(result => Structure.Deserialize(Convert.FromBase64String(result.Account.Data[0]))));
             return new ProgramAccountsResultWrapper<List<Structure>>(res, resultingAccounts);
+        }
+
+        public async Task<ProgramAccountsResultWrapper<List<Unit>>> GetUnitsAsync(string programAddress, Commitment commitment = Commitment.Finalized)
+        {
+            var list = new List<MemCmp> { new MemCmp { Bytes = Unit.EncodedAccID, Offset = 0 } };
+            var res = await RpcClient.GetProgramAccountsAsync(programAddress, commitment, memCmpList: list);
+            if (!res.WasSuccessful || !(res.Result?.Count > 0))
+                return new ProgramAccountsResultWrapper<List<Unit>>(res);
+            List<Unit> resultingAccounts = new List<Unit>(res.Result.Count);
+            resultingAccounts.AddRange(res.Result.Select(result => Unit.Deserialize(Convert.FromBase64String(result.Account.Data[0]))));
+            return new ProgramAccountsResultWrapper<List<Unit>>(res, resultingAccounts);
         }
 
         public async Task<AccountResultWrapper<Army>> GetArmyAsync(string accountAddress, Commitment commitment = Commitment.Finalized)
@@ -79,9 +106,17 @@ namespace Frontier
             var res = await RpcClient.GetAccountInfoAsync(accountAddress, commitment);
             if (!res.WasSuccessful)
                 return new AccountResultWrapper<Army>(res);
-
             var resultingAccount = Army.Deserialize(Convert.FromBase64String(res.Result.Value.Data[0]));
             return new AccountResultWrapper<Army>(res, resultingAccount);
+        }
+
+        public async Task<AccountResultWrapper<GameMatch>> GetGameMatchAsync(string accountAddress, Commitment commitment = Commitment.Finalized)
+        {
+            var res = await RpcClient.GetAccountInfoAsync(accountAddress, commitment);
+            if (!res.WasSuccessful)
+                return new AccountResultWrapper<GameMatch>(res);
+            var resultingAccount = GameMatch.Deserialize(Convert.FromBase64String(res.Result.Value.Data[0]));
+            return new AccountResultWrapper<GameMatch>(res, resultingAccount);
         }
 
         public async Task<AccountResultWrapper<PlayerBase>> GetPlayerBaseAsync(string accountAddress, Commitment commitment = Commitment.Finalized)
@@ -89,19 +124,26 @@ namespace Frontier
             var res = await RpcClient.GetAccountInfoAsync(accountAddress, commitment);
             if (!res.WasSuccessful)
                 return new AccountResultWrapper<PlayerBase>(res);
-
             var resultingAccount = PlayerBase.Deserialize(Convert.FromBase64String(res.Result.Value.Data[0]));
             return new AccountResultWrapper<PlayerBase>(res, resultingAccount);
         }
 
-        public async Task<AccountResultWrapper<Accounts.Player>> GetPlayerAsync(string accountAddress, Commitment commitment = Commitment.Finalized)
+        public async Task<AccountResultWrapper<Player>> GetPlayerAsync(string accountAddress, Commitment commitment = Commitment.Finalized)
         {
             var res = await RpcClient.GetAccountInfoAsync(accountAddress, commitment);
             if (!res.WasSuccessful)
-                return new AccountResultWrapper<Accounts.Player>(res);
+                return new AccountResultWrapper<Player>(res);
+            var resultingAccount = Player.Deserialize(Convert.FromBase64String(res.Result.Value.Data[0]));
+            return new AccountResultWrapper<Player>(res, resultingAccount);
+        }
 
-            var resultingAccount = Accounts.Player.Deserialize(Convert.FromBase64String(res.Result.Value.Data[0]));
-            return new AccountResultWrapper<Accounts.Player>(res, resultingAccount);
+        public async Task<AccountResultWrapper<Season>> GetSeasonAsync(string accountAddress, Commitment commitment = Commitment.Finalized)
+        {
+            var res = await RpcClient.GetAccountInfoAsync(accountAddress, commitment);
+            if (!res.WasSuccessful)
+                return new AccountResultWrapper<Season>(res);
+            var resultingAccount = Season.Deserialize(Convert.FromBase64String(res.Result.Value.Data[0]));
+            return new AccountResultWrapper<Season>(res, resultingAccount);
         }
 
         public async Task<AccountResultWrapper<Structure>> GetStructureAsync(string accountAddress, Commitment commitment = Commitment.Finalized)
@@ -109,12 +151,20 @@ namespace Frontier
             var res = await RpcClient.GetAccountInfoAsync(accountAddress, commitment);
             if (!res.WasSuccessful)
                 return new AccountResultWrapper<Structure>(res);
-
             var resultingAccount = Structure.Deserialize(Convert.FromBase64String(res.Result.Value.Data[0]));
             return new AccountResultWrapper<Structure>(res, resultingAccount);
         }
 
-        public async Task<SubscriptionState> SubscribeArmyAsync(string accountAddress, Action<SubscriptionState, Solnet.Rpc.Messages.ResponseValue<AccountInfo>, Army> callback, Commitment commitment = Commitment.Finalized)
+        public async Task<AccountResultWrapper<Unit>> GetUnitAsync(string accountAddress, Commitment commitment = Commitment.Finalized)
+        {
+            var res = await RpcClient.GetAccountInfoAsync(accountAddress, commitment);
+            if (!res.WasSuccessful)
+                return new AccountResultWrapper<Unit>(res);
+            var resultingAccount = Unit.Deserialize(Convert.FromBase64String(res.Result.Value.Data[0]));
+            return new AccountResultWrapper<Unit>(res, resultingAccount);
+        }
+
+        public async Task<SubscriptionState> SubscribeArmyAsync(string accountAddress, Action<SubscriptionState, ResponseValue<AccountInfo>, Army> callback, Commitment commitment = Commitment.Finalized)
         {
             SubscriptionState res = await StreamingRpcClient.SubscribeAccountInfoAsync(accountAddress, (s, e) =>
             {
@@ -126,7 +176,19 @@ namespace Frontier
             return res;
         }
 
-        public async Task<SubscriptionState> SubscribePlayerBaseAsync(string accountAddress, Action<SubscriptionState, Solnet.Rpc.Messages.ResponseValue<AccountInfo>, PlayerBase> callback, Commitment commitment = Commitment.Finalized)
+        public async Task<SubscriptionState> SubscribeGameMatchAsync(string accountAddress, Action<SubscriptionState, ResponseValue<AccountInfo>, GameMatch> callback, Commitment commitment = Commitment.Finalized)
+        {
+            SubscriptionState res = await StreamingRpcClient.SubscribeAccountInfoAsync(accountAddress, (s, e) =>
+            {
+                GameMatch parsingResult = null;
+                if (e.Value?.Data?.Count > 0)
+                    parsingResult = GameMatch.Deserialize(Convert.FromBase64String(e.Value.Data[0]));
+                callback(s, e, parsingResult);
+            }, commitment);
+            return res;
+        }
+
+        public async Task<SubscriptionState> SubscribePlayerBaseAsync(string accountAddress, Action<SubscriptionState, ResponseValue<AccountInfo>, PlayerBase> callback, Commitment commitment = Commitment.Finalized)
         {
             SubscriptionState res = await StreamingRpcClient.SubscribeAccountInfoAsync(accountAddress, (s, e) =>
             {
@@ -138,19 +200,31 @@ namespace Frontier
             return res;
         }
 
-        public async Task<SubscriptionState> SubscribePlayerAsync(string accountAddress, Action<SubscriptionState, Solnet.Rpc.Messages.ResponseValue<AccountInfo>, Accounts.Player> callback, Commitment commitment = Commitment.Finalized)
+        public async Task<SubscriptionState> SubscribePlayerAsync(string accountAddress, Action<SubscriptionState, ResponseValue<AccountInfo>, Player> callback, Commitment commitment = Commitment.Finalized)
         {
             SubscriptionState res = await StreamingRpcClient.SubscribeAccountInfoAsync(accountAddress, (s, e) =>
             {
-                Accounts.Player parsingResult = null;
+                Player parsingResult = null;
                 if (e.Value?.Data?.Count > 0)
-                    parsingResult = Accounts.Player.Deserialize(Convert.FromBase64String(e.Value.Data[0]));
+                    parsingResult = Player.Deserialize(Convert.FromBase64String(e.Value.Data[0]));
                 callback(s, e, parsingResult);
             }, commitment);
             return res;
         }
 
-        public async Task<SubscriptionState> SubscribeStructureAsync(string accountAddress, Action<SubscriptionState, Solnet.Rpc.Messages.ResponseValue<AccountInfo>, Structure> callback, Commitment commitment = Commitment.Finalized)
+        public async Task<SubscriptionState> SubscribeSeasonAsync(string accountAddress, Action<SubscriptionState, ResponseValue<AccountInfo>, Season> callback, Commitment commitment = Commitment.Finalized)
+        {
+            SubscriptionState res = await StreamingRpcClient.SubscribeAccountInfoAsync(accountAddress, (s, e) =>
+            {
+                Season parsingResult = null;
+                if (e.Value?.Data?.Count > 0)
+                    parsingResult = Season.Deserialize(Convert.FromBase64String(e.Value.Data[0]));
+                callback(s, e, parsingResult);
+            }, commitment);
+            return res;
+        }
+
+        public async Task<SubscriptionState> SubscribeStructureAsync(string accountAddress, Action<SubscriptionState, ResponseValue<AccountInfo>, Structure> callback, Commitment commitment = Commitment.Finalized)
         {
             SubscriptionState res = await StreamingRpcClient.SubscribeAccountInfoAsync(accountAddress, (s, e) =>
             {
@@ -162,44 +236,222 @@ namespace Frontier
             return res;
         }
 
-        public async Task<byte[]> InitPlayerAccountsInstruction(InitPlayerAccountsAccounts accounts)
+        public async Task<SubscriptionState> SubscribeUnitAsync(string accountAddress, Action<SubscriptionState, ResponseValue<AccountInfo>, Unit> callback, Commitment commitment = Commitment.Finalized)
         {
-            RequestResult<ResponseValue<LatestBlockHash>> blockHash = await RpcClient.GetLatestBlockHashAsync();
-            TransactionInstruction instr = FrontierProgram.InitPlayerAccounts(accounts);
-            byte[] InitPlayerInstruction = new TransactionBuilder().
+            SubscriptionState res = await StreamingRpcClient.SubscribeAccountInfoAsync(accountAddress, (s, e) =>
+            {
+                Unit parsingResult = null;
+                if (e.Value?.Data?.Count > 0)
+                    parsingResult = Unit.Deserialize(Convert.FromBase64String(e.Value.Data[0]));
+                callback(s, e, parsingResult);
+            }, commitment);
+            return res;
+        }
+
+        public string SendInitSeason(InitSeasonAccounts accounts, uint seasonId, PublicKey programId)
+        {
+            RequestResult<ResponseValue<LatestBlockHash>> blockHash = RpcClient.GetLatestBlockHash();
+            TransactionInstruction instr = FrontierProgram.InitSeason(accounts, seasonId, programId);
+            byte[] Instruction = new TransactionBuilder().
+            SetRecentBlockHash(blockHash.Result.Value.Blockhash).
+            SetFeePayer(FrontierRuntime.AirlockWallet.playerAddress).
+            AddInstruction(instr).
+            CompileMessage();
+            FrontierRuntime.AirlockWallet.SignMessage(Instruction);
+            FrontierRuntime.PacketChamber.Add(new TransactionPacket(true, Instruction));
+            return  "Transaction Signed & Sent to chamber!";
+        }
+
+        public string SendInitPlayerAccounts(InitPlayerAccountsAccounts accounts, FactionType faction, PublicKey programId)
+        {
+            RequestResult<ResponseValue<LatestBlockHash>> blockHash = RpcClient.GetLatestBlockHash();
+            TransactionInstruction instr = FrontierProgram.InitPlayerAccounts(accounts, faction, programId);
+            byte[] Instruction = new TransactionBuilder().
            SetRecentBlockHash(blockHash.Result.Value.Blockhash).
-           SetFeePayer(accounts.Owner).
+           SetFeePayer(FrontierRuntime.AirlockWallet.playerAddress).
            AddInstruction(instr).
            CompileMessage();
-
-            return InitPlayerInstruction;
+            FrontierRuntime.AirlockWallet.SignMessage(Instruction);
+            FrontierRuntime.PacketChamber.Add(new TransactionPacket(true, Instruction));
+            return  "Transaction Signed & Sent to chamber!";
         }
 
-        public async Task<byte[]> BuildStructureInstruction(BuildStructureAccounts accounts, uint structureCount, StructureType structureType, Position position, PublicKey ownerAddress, Func<byte[], PublicKey, byte[]> signingCallback, PublicKey programId)
+        public string SendBuildStructureAsync(BuildStructureAccounts accounts, uint structureCount, StructureType structureType, Position position, PublicKey programId)
         {
-            RequestResult<ResponseValue<LatestBlockHash>> blockHash = await RpcClient.GetLatestBlockHashAsync();
-            TransactionInstruction instr = FrontierProgram.BuildStructure(accounts, structureCount, structureType, position);
-            byte[] BuildStructureInstruction = new TransactionBuilder().
-      SetRecentBlockHash(blockHash.Result.Value.Blockhash).
-      SetFeePayer(ownerAddress).
-      AddInstruction(instr).
-      CompileMessage();
-
-            return BuildStructureInstruction;
+            RequestResult<ResponseValue<LatestBlockHash>> blockHash = RpcClient.GetLatestBlockHash();
+            TransactionInstruction instr = FrontierProgram.BuildStructure(accounts, structureCount, structureType, position, programId);
+            byte[] Instruction = new TransactionBuilder().
+            SetRecentBlockHash(blockHash.Result.Value.Blockhash).
+            SetFeePayer(FrontierRuntime.AirlockWallet.playerAddress).
+            AddInstruction(instr).
+            CompileMessage();
+            FrontierRuntime.AirlockWallet.SignMessage(Instruction);
+            FrontierRuntime.PacketChamber.Add(new TransactionPacket(true, Instruction));
+            return  "Transaction Signed & Sent to chamber!";
         }
 
-        public async Task<byte[]> SendCollectResourcesAsync(CollectResourcesAccounts accounts, uint structureCount, PublicKey ownerAddress)
+        public TransactionInstruction CollectResourcesInstruction(CollectResourcesAccounts accounts, uint structureCount, PublicKey programId)
         {
-            RequestResult<ResponseValue<LatestBlockHash>> blockHash = await RpcClient.GetLatestBlockHashAsync();
-            TransactionInstruction instr = FrontierProgram.CollectResources(accounts, structureCount);
-            byte[] CollectResourcesInstruction = new TransactionBuilder().
-      SetRecentBlockHash(blockHash.Result.Value.Blockhash).
-      SetFeePayer(ownerAddress).
-      AddInstruction(instr).
-      CompileMessage();
+            TransactionInstruction instr = FrontierProgram.CollectResources(accounts, structureCount, programId);
+            return instr;
+        }
+        public string SendCollectResourcesAsync(List<TransactionInstruction> _resourceInstruBatch)
+        {
+            RequestResult<ResponseValue<LatestBlockHash>> blockHash = RpcClient.GetLatestBlockHash();
+            TransactionBuilder builder = new TransactionBuilder().
+                SetRecentBlockHash(blockHash.Result.Value.Blockhash).
+                SetFeePayer(FrontierRuntime.AirlockWallet.playerAddress);
+            
+            foreach(var resource in _resourceInstruBatch)
+            {
+                builder.AddInstruction(resource);
+            }
 
-            return CollectResourcesInstruction;
+            byte[] Instruction = builder.CompileMessage();
+
+            FrontierRuntime.AirlockWallet.SignMessage(Instruction);
+            FrontierRuntime.PacketChamber.Add(new TransactionPacket(true, Instruction));
+            return  "Transaction Signed & Sent to chamber!";
         }
 
+        public string SendMoveStructureAsync(MoveStructureAccounts accounts, uint structureCount, Position newPos, PublicKey feePayer, Func<byte[], PublicKey, byte[]> signingCallback, PublicKey programId)
+        {
+            RequestResult<ResponseValue<LatestBlockHash>> blockHash = RpcClient.GetLatestBlockHash();
+            TransactionInstruction instr = FrontierProgram.MoveStructure(accounts, structureCount, newPos, programId);
+            byte[] Instruction = new TransactionBuilder().
+            SetRecentBlockHash(blockHash.Result.Value.Blockhash).
+            SetFeePayer(FrontierRuntime.AirlockWallet.playerAddress).
+            AddInstruction(instr).
+            CompileMessage();
+            FrontierRuntime.AirlockWallet.SignMessage(Instruction);
+            FrontierRuntime.PacketChamber.Add(new TransactionPacket(true, Instruction));
+            return  "Transaction Signed & Sent to chamber!";
+        }
+
+        public string SendAssignWorkerAsync(AssignWorkerAccounts accounts, uint fromStructureCount, uint toStructureCount, PublicKey feePayer, Func<byte[], PublicKey, byte[]> signingCallback, PublicKey programId)
+        {
+            RequestResult<ResponseValue<LatestBlockHash>> blockHash = RpcClient.GetLatestBlockHash();
+            TransactionInstruction instr = FrontierProgram.AssignWorker(accounts, fromStructureCount, toStructureCount, programId);
+            byte[] Instruction = new TransactionBuilder().
+         SetRecentBlockHash(blockHash.Result.Value.Blockhash).
+         SetFeePayer(FrontierRuntime.AirlockWallet.playerAddress).
+         AddInstruction(instr).
+         CompileMessage();
+            FrontierRuntime.AirlockWallet.SignMessage(Instruction);
+            FrontierRuntime.PacketChamber.Add(new TransactionPacket(true, Instruction));
+            return  "Transaction Signed & Sent to chamber!";
+        }
+
+        public string SendTrainUnitAsync(TrainUnitAccounts accounts, uint unitCount, UnitType unitType, PublicKey feePayer, Func<byte[], PublicKey, byte[]> signingCallback, PublicKey programId)
+        {
+            RequestResult<ResponseValue<LatestBlockHash>> blockHash = RpcClient.GetLatestBlockHash();
+            TransactionInstruction instr = FrontierProgram.TrainUnit(accounts, unitCount, unitType, programId);
+            byte[] Instruction = new TransactionBuilder().
+         SetRecentBlockHash(blockHash.Result.Value.Blockhash).
+         SetFeePayer(FrontierRuntime.AirlockWallet.playerAddress).
+         AddInstruction(instr).
+         CompileMessage();
+            FrontierRuntime.AirlockWallet.SignMessage(Instruction);
+            FrontierRuntime.PacketChamber.Add(new TransactionPacket(true, Instruction));
+            return  "Transaction Signed & Sent to chamber!";
+        }
+
+        public string SendStartMatchAsync(StartMatchAccounts accounts, uint seasonId, uint matchId, uint pvpStructureId, PublicKey feePayer, Func<byte[], PublicKey, byte[]> signingCallback, PublicKey programId)
+        {
+            RequestResult<ResponseValue<LatestBlockHash>> blockHash = RpcClient.GetLatestBlockHash();
+            TransactionInstruction instr = FrontierProgram.StartMatch(accounts, seasonId, matchId, pvpStructureId, programId);
+            byte[] Instruction = new TransactionBuilder().
+       SetRecentBlockHash(blockHash.Result.Value.Blockhash).
+       SetFeePayer(FrontierRuntime.AirlockWallet.playerAddress).
+       AddInstruction(instr).
+       CompileMessage();
+            FrontierRuntime.AirlockWallet.SignMessage(Instruction);
+            FrontierRuntime.PacketChamber.Add(new TransactionPacket(true, Instruction));
+            return  "Transaction Signed & Sent to chamber!";
+        }
+
+        public string SendAddStructureToMatchAsync(AddStructureToMatchAccounts accounts, uint seasonId, uint matchId, uint addedStructureId, uint matchStructureId, PublicKey feePayer, Func<byte[], PublicKey, byte[]> signingCallback, PublicKey programId)
+        {
+            RequestResult<ResponseValue<LatestBlockHash>> blockHash = RpcClient.GetLatestBlockHash();
+            TransactionInstruction instr = FrontierProgram.AddStructureToMatch(accounts, seasonId, matchId, addedStructureId, matchStructureId, programId);
+            byte[] Instruction = new TransactionBuilder().
+       SetRecentBlockHash(blockHash.Result.Value.Blockhash).
+       SetFeePayer(FrontierRuntime.AirlockWallet.playerAddress).
+       AddInstruction(instr).
+       CompileMessage();
+            FrontierRuntime.AirlockWallet.SignMessage(Instruction);
+            FrontierRuntime.PacketChamber.Add(new TransactionPacket(true, Instruction));
+            return  "Transaction Signed & Sent to chamber!";
+        }
+
+        public string SendAddUnitToMatchAsync(AddUnitToMatchAccounts accounts, uint seasonId, uint matchId, uint addedUnitId, uint matchUnitId, PublicKey feePayer, Func<byte[], PublicKey, byte[]> signingCallback, PublicKey programId)
+        {
+            RequestResult<ResponseValue<LatestBlockHash>> blockHash = RpcClient.GetLatestBlockHash();
+            TransactionInstruction instr = FrontierProgram.AddUnitToMatch(accounts, seasonId, matchId, addedUnitId, matchUnitId, programId);
+            byte[] Instruction = new TransactionBuilder().
+       SetRecentBlockHash(blockHash.Result.Value.Blockhash).
+       SetFeePayer(FrontierRuntime.AirlockWallet.playerAddress).
+       AddInstruction(instr).
+       CompileMessage();
+            FrontierRuntime.AirlockWallet.SignMessage(Instruction);
+            FrontierRuntime.PacketChamber.Add(new TransactionPacket(true, Instruction));
+            return  "Transaction Signed & Sent to chamber!";
+        }
+
+        public string SendTransitionMatchStateAsync(TransitionMatchStateAccounts accounts, uint seasonId, uint matchId, MatchState matchState, PublicKey feePayer, Func<byte[], PublicKey, byte[]> signingCallback, PublicKey programId)
+        {
+            RequestResult<ResponseValue<LatestBlockHash>> blockHash = RpcClient.GetLatestBlockHash();
+            TransactionInstruction instr = FrontierProgram.TransitionMatchState(accounts, seasonId, matchId, matchState, programId);
+            byte[] Instruction = new TransactionBuilder().
+        SetRecentBlockHash(blockHash.Result.Value.Blockhash).
+        SetFeePayer(FrontierRuntime.AirlockWallet.playerAddress).
+        AddInstruction(instr).
+        CompileMessage();
+            FrontierRuntime.AirlockWallet.SignMessage(Instruction);
+            FrontierRuntime.PacketChamber.Add(new TransactionPacket(true, Instruction));
+            return  "Transaction Signed & Sent to chamber!";
+        }
+
+        public string SendAttackStructureAsync(AttackStructureAccounts accounts, uint seasonId, uint matchId, uint matchUnitId, uint matchStructureId, PublicKey feePayer, Func<byte[], PublicKey, byte[]> signingCallback, PublicKey programId)
+        {
+            RequestResult<ResponseValue<LatestBlockHash>> blockHash = RpcClient.GetLatestBlockHash();
+            TransactionInstruction instr = FrontierProgram.AttackStructure(accounts, seasonId, matchId, matchUnitId, matchStructureId, programId);
+            byte[] Instruction = new TransactionBuilder().
+       SetRecentBlockHash(blockHash.Result.Value.Blockhash).
+       SetFeePayer(FrontierRuntime.AirlockWallet.playerAddress).
+       AddInstruction(instr).
+       CompileMessage();
+            FrontierRuntime.AirlockWallet.SignMessage(Instruction);
+            FrontierRuntime.PacketChamber.Add(new TransactionPacket(true, Instruction));
+            return  "Transaction Signed & Sent to chamber!";
+        }
+
+        public string SendAttackUnitAsync(AttackUnitAccounts accounts, uint seasonId, uint matchId, uint matchUnitId, uint matchStructureId, PublicKey feePayer, Func<byte[], PublicKey, byte[]> signingCallback, PublicKey programId)
+        {
+            RequestResult<ResponseValue<LatestBlockHash>> blockHash = RpcClient.GetLatestBlockHash();
+            TransactionInstruction instr = FrontierProgram.AttackUnit(accounts, seasonId, matchId, matchUnitId, matchStructureId, programId);
+            byte[] Instruction = new TransactionBuilder().
+       SetRecentBlockHash(blockHash.Result.Value.Blockhash).
+       SetFeePayer(FrontierRuntime.AirlockWallet.playerAddress).
+       AddInstruction(instr).
+       CompileMessage();
+            FrontierRuntime.AirlockWallet.SignMessage(Instruction);
+            FrontierRuntime.PacketChamber.Add(new TransactionPacket(true, Instruction));
+            return "Transaction Signed & Sent to chamber!";
+        }
+
+        public string SendDistributeMatchRewardsAsync(DistributeMatchRewardsAccounts accounts, uint seasonId, uint matchId, PublicKey feePayer, Func<byte[], PublicKey, byte[]> signingCallback, PublicKey programId)
+        {
+            RequestResult<ResponseValue<LatestBlockHash>> blockHash = RpcClient.GetLatestBlockHash();
+            TransactionInstruction instr = FrontierProgram.DistributeMatchRewards(accounts, seasonId, matchId, programId);
+            byte[] Instruction = new TransactionBuilder().
+        SetRecentBlockHash(blockHash.Result.Value.Blockhash).
+        SetFeePayer(FrontierRuntime.AirlockWallet.playerAddress).
+        AddInstruction(instr).
+        CompileMessage();
+            FrontierRuntime.AirlockWallet.SignMessage(Instruction);
+            FrontierRuntime.PacketChamber.Add(new TransactionPacket(true, Instruction));
+            return "Distributed Match Rewards!";
+        }
     }
 }
