@@ -46,7 +46,7 @@ namespace Game
         {
             try
             {
-                var rpc1 = ClientFactory.GetClient("https://side-virulent-butterfly.solana-devnet.quiknode.pro/c14f8529f9bbaef2a55542c7e3fbc5eb06e5acf0/");
+                var rpc1 = ClientFactory.GetClient("https://api.devnet.solana.com");
                 var rpc2 = ClientFactory.GetStreamingClient("wss://side-virulent-butterfly.solana-devnet.quiknode.pro/c14f8529f9bbaef2a55542c7e3fbc5eb06e5acf0/");
                 ChainClient = new FrontierChainClient(rpc1, rpc2, FrontierProgram.ProgramAddress);
                 ChainClient.InitializeChainClient("test");
@@ -72,7 +72,8 @@ namespace Game
                     delay = 50;
                 foreach (var tpkt in ChainClient.PacketChamber.ToArray())
                 {
-                    var tx = ChainClient.RpcClient.SendTransaction(tpkt.signedTransaction, commitment: Solnet.Rpc.Types.Commitment.Finalized);
+                    var testt = ClientFactory.GetClient(Cluster.DevNet);
+                    var tx = testt.SendTransaction(tpkt.signedTransaction, true, commitment: Solnet.Rpc.Types.Commitment.Finalized);
                     Debug.Log(LogLevel.Warning, "Sending a game transaction! - " + Convert.ToBase64String(tpkt.signedTransaction) + " | " + tx.RawRpcResponse);
                     var tpktRef = ChainClient.PacketChamber.Find(p => p == tpkt);
                     _ = ChainClient.PacketChamber.Remove(tpktRef);

@@ -4,6 +4,7 @@ using Frontiers.Program;
 using Frontiers.Types;
 using Frontiers.Utilities;
 using Frontiers.Wallet;
+using Microsoft.AspNetCore.DataProtection;
 using Solnet.Extensions;
 using Solnet.Programs;
 using Solnet.Programs.Abstract;
@@ -16,6 +17,7 @@ using Solnet.Rpc.Messages;
 using Solnet.Rpc.Models;
 using Solnet.Rpc.Types;
 using Solnet.Wallet;
+using System;
 using UnrealEngine.Framework;
 using Player = Frontiers.Accounts.Player;
 
@@ -50,7 +52,7 @@ namespace Frontiers
                     bool successfulLogin = AirlockWallet.validCredentials();
                     if (successfulLogin)
                     {
-
+                        
                         levelScript = World.GetActor<LevelScript>();
                         PacketChamber = new Sequencer();
                         AirlockWallet.tokenWallet = TokenWallet.Load(this.RpcClient, AirlockWallet.tokenMintDatabase, AirlockWallet.playerAddress);
@@ -310,13 +312,12 @@ namespace Frontiers
         {
             RequestResult<ResponseValue<LatestBlockHash>> blockHash = RpcClient.GetLatestBlockHash();
             TransactionInstruction instr = FrontierProgram.InitSeason(accounts, seasonId, programId);
-            byte[] Instruction = new TransactionBuilder().
-            SetRecentBlockHash(blockHash.Result.Value.Blockhash).
-            SetFeePayer(AirlockWallet.playerAddress).
-            AddInstruction(instr).
-            CompileMessage();
-            AirlockWallet.SignMessage(Instruction);
-            PacketChamber.Add(new TransactionPacket(true, Instruction));
+            TransactionBuilder Instruction = new TransactionBuilder().
+          SetRecentBlockHash(blockHash.Result.Value.Blockhash).
+          SetFeePayer(AirlockWallet.playerAddress).
+          AddInstruction(instr);
+            byte[] transaction = AirlockWallet.SignMessage(Instruction);
+            PacketChamber.Add(new TransactionPacket(true, transaction));
             return  "Transaction Signed & Sent to chamber!";
         }
 
@@ -325,13 +326,12 @@ namespace Frontiers
             var accounts = new InitPlayerAccountsAccounts { Owner = AirlockWallet.playerAddress, PlayerAccount = PlayerPDAs["player"], BaseAccount = PlayerPDAs["base"], ArmyAccount = PlayerPDAs["army"], SystemProgram = SystemProgram.ProgramIdKey };
             RequestResult<ResponseValue<LatestBlockHash>> blockHash = RpcClient.GetLatestBlockHash();
             TransactionInstruction instr = FrontierProgram.InitPlayerAccounts(accounts, faction, programId);
-            byte[] Instruction = new TransactionBuilder().
+            TransactionBuilder Instruction = new TransactionBuilder().
            SetRecentBlockHash(blockHash.Result.Value.Blockhash).
            SetFeePayer(AirlockWallet.playerAddress).
-           AddInstruction(instr).
-           CompileMessage();
-            AirlockWallet.SignMessage(Instruction);
-            PacketChamber.Add(new TransactionPacket(true, Instruction));
+           AddInstruction(instr);
+            byte[] transaction = AirlockWallet.SignMessage(Instruction);
+            PacketChamber.Add(new TransactionPacket(true, transaction));
             return  "Transaction Signed & Sent to chamber!";
         }
 
@@ -339,13 +339,12 @@ namespace Frontiers
         {
             RequestResult<ResponseValue<LatestBlockHash>> blockHash = RpcClient.GetLatestBlockHash();
             TransactionInstruction instr = FrontierProgram.BuildStructure(accounts, structureCount, structureType, position, programId);
-            byte[] Instruction = new TransactionBuilder().
-            SetRecentBlockHash(blockHash.Result.Value.Blockhash).
-            SetFeePayer(AirlockWallet.playerAddress).
-            AddInstruction(instr).
-            CompileMessage();
-            AirlockWallet.SignMessage(Instruction);
-            PacketChamber.Add(new TransactionPacket(true, Instruction));
+            TransactionBuilder Instruction = new TransactionBuilder().
+           SetRecentBlockHash(blockHash.Result.Value.Blockhash).
+           SetFeePayer(AirlockWallet.playerAddress).
+           AddInstruction(instr);
+            byte[] transaction = AirlockWallet.SignMessage(Instruction);
+            PacketChamber.Add(new TransactionPacket(true, transaction));
             return  "Transaction Signed & Sent to chamber!";
         }
 
@@ -366,10 +365,9 @@ namespace Frontiers
                 builder.AddInstruction(resource);
             }
 
-            byte[] Instruction = builder.CompileMessage();
-
-            AirlockWallet.SignMessage(Instruction);
-            PacketChamber.Add(new TransactionPacket(true, Instruction));
+         
+            byte[] transaction = AirlockWallet.SignMessage(builder);
+            PacketChamber.Add(new TransactionPacket(true, transaction));
             return  "Transaction Signed & Sent to chamber!";
         }
 
@@ -377,13 +375,12 @@ namespace Frontiers
         {
             RequestResult<ResponseValue<LatestBlockHash>> blockHash = RpcClient.GetLatestBlockHash();
             TransactionInstruction instr = FrontierProgram.MoveStructure(accounts, structureCount, newPos, programId);
-            byte[] Instruction = new TransactionBuilder().
-            SetRecentBlockHash(blockHash.Result.Value.Blockhash).
-            SetFeePayer(AirlockWallet.playerAddress).
-            AddInstruction(instr).
-            CompileMessage();
-            AirlockWallet.SignMessage(Instruction);
-            PacketChamber.Add(new TransactionPacket(true, Instruction));
+            TransactionBuilder Instruction = new TransactionBuilder().
+                SetRecentBlockHash(blockHash.Result.Value.Blockhash).
+                SetFeePayer(AirlockWallet.playerAddress).
+                AddInstruction(instr);
+            byte[] transaction = AirlockWallet.SignMessage(Instruction);
+            PacketChamber.Add(new TransactionPacket(true, transaction));
             return  "Transaction Signed & Sent to chamber!";
         }
 
@@ -391,13 +388,12 @@ namespace Frontiers
         {
             RequestResult<ResponseValue<LatestBlockHash>> blockHash = RpcClient.GetLatestBlockHash();
             TransactionInstruction instr = FrontierProgram.AssignWorker(accounts, fromStructureCount, toStructureCount, programId);
-            byte[] Instruction = new TransactionBuilder().
-         SetRecentBlockHash(blockHash.Result.Value.Blockhash).
-         SetFeePayer(AirlockWallet.playerAddress).
-         AddInstruction(instr).
-         CompileMessage();
-            AirlockWallet.SignMessage(Instruction);
-            PacketChamber.Add(new TransactionPacket(true, Instruction));
+             TransactionBuilder Instruction = new TransactionBuilder().
+                SetRecentBlockHash(blockHash.Result.Value.Blockhash).
+                SetFeePayer(AirlockWallet.playerAddress).
+                AddInstruction(instr);
+            byte[] transaction = AirlockWallet.SignMessage(Instruction);
+            PacketChamber.Add(new TransactionPacket(true, transaction));
             return  "Transaction Signed & Sent to chamber!";
         }
 
@@ -405,13 +401,12 @@ namespace Frontiers
         {
             RequestResult<ResponseValue<LatestBlockHash>> blockHash = RpcClient.GetLatestBlockHash();
             TransactionInstruction instr = FrontierProgram.TrainUnit(accounts, unitCount, unitType, programId);
-            byte[] Instruction = new TransactionBuilder().
-         SetRecentBlockHash(blockHash.Result.Value.Blockhash).
-         SetFeePayer(AirlockWallet.playerAddress).
-         AddInstruction(instr).
-         CompileMessage();
-            AirlockWallet.SignMessage(Instruction);
-            PacketChamber.Add(new TransactionPacket(true, Instruction));
+            TransactionBuilder Instruction = new TransactionBuilder().
+                SetRecentBlockHash(blockHash.Result.Value.Blockhash).
+                SetFeePayer(AirlockWallet.playerAddress).
+                AddInstruction(instr);
+            byte[] transaction = AirlockWallet.SignMessage(Instruction);
+            PacketChamber.Add(new TransactionPacket(true, transaction));
             return  "Transaction Signed & Sent to chamber!";
         }
 
@@ -419,13 +414,12 @@ namespace Frontiers
         {
             RequestResult<ResponseValue<LatestBlockHash>> blockHash = RpcClient.GetLatestBlockHash();
             TransactionInstruction instr = FrontierProgram.StartMatch(accounts, seasonId, matchId, pvpStructureId, programId);
-            byte[] Instruction = new TransactionBuilder().
-       SetRecentBlockHash(blockHash.Result.Value.Blockhash).
-       SetFeePayer(AirlockWallet.playerAddress).
-       AddInstruction(instr).
-       CompileMessage();
-            AirlockWallet.SignMessage(Instruction);
-            PacketChamber.Add(new TransactionPacket(true, Instruction));
+            TransactionBuilder Instruction = new TransactionBuilder().
+                SetRecentBlockHash(blockHash.Result.Value.Blockhash).
+                SetFeePayer(AirlockWallet.playerAddress).
+                AddInstruction(instr);
+            byte[] transaction = AirlockWallet.SignMessage(Instruction);
+            PacketChamber.Add(new TransactionPacket(true, transaction));
             return  "Transaction Signed & Sent to chamber!";
         }
 
@@ -433,13 +427,12 @@ namespace Frontiers
         {
             RequestResult<ResponseValue<LatestBlockHash>> blockHash = RpcClient.GetLatestBlockHash();
             TransactionInstruction instr = FrontierProgram.AddStructureToMatch(accounts, seasonId, matchId, addedStructureId, matchStructureId, programId);
-            byte[] Instruction = new TransactionBuilder().
-       SetRecentBlockHash(blockHash.Result.Value.Blockhash).
-       SetFeePayer(AirlockWallet.playerAddress).
-       AddInstruction(instr).
-       CompileMessage();
-            AirlockWallet.SignMessage(Instruction);
-            PacketChamber.Add(new TransactionPacket(true, Instruction));
+            TransactionBuilder Instruction = new TransactionBuilder().
+                SetRecentBlockHash(blockHash.Result.Value.Blockhash).
+                SetFeePayer(AirlockWallet.playerAddress).
+                AddInstruction(instr);
+            byte[] transaction = AirlockWallet.SignMessage(Instruction);
+            PacketChamber.Add(new TransactionPacket(true, transaction));
             return  "Transaction Signed & Sent to chamber!";
         }
 
@@ -447,13 +440,12 @@ namespace Frontiers
         {
             RequestResult<ResponseValue<LatestBlockHash>> blockHash = RpcClient.GetLatestBlockHash();
             TransactionInstruction instr = FrontierProgram.AddUnitToMatch(accounts, seasonId, matchId, addedUnitId, matchUnitId, programId);
-            byte[] Instruction = new TransactionBuilder().
-       SetRecentBlockHash(blockHash.Result.Value.Blockhash).
-       SetFeePayer(AirlockWallet.playerAddress).
-       AddInstruction(instr).
-       CompileMessage();
-            AirlockWallet.SignMessage(Instruction);
-            PacketChamber.Add(new TransactionPacket(true, Instruction));
+            TransactionBuilder Instruction = new TransactionBuilder().
+                SetRecentBlockHash(blockHash.Result.Value.Blockhash).
+                SetFeePayer(AirlockWallet.playerAddress).
+                AddInstruction(instr);
+            byte[] transaction = AirlockWallet.SignMessage(Instruction);
+            PacketChamber.Add(new TransactionPacket(true, transaction));
             return  "Transaction Signed & Sent to chamber!";
         }
 
@@ -461,13 +453,12 @@ namespace Frontiers
         {
             RequestResult<ResponseValue<LatestBlockHash>> blockHash = RpcClient.GetLatestBlockHash();
             TransactionInstruction instr = FrontierProgram.TransitionMatchState(accounts, seasonId, matchId, matchState, programId);
-            byte[] Instruction = new TransactionBuilder().
-        SetRecentBlockHash(blockHash.Result.Value.Blockhash).
-        SetFeePayer(AirlockWallet.playerAddress).
-        AddInstruction(instr).
-        CompileMessage();
-            AirlockWallet.SignMessage(Instruction);
-            PacketChamber.Add(new TransactionPacket(true, Instruction));
+            TransactionBuilder Instruction = new TransactionBuilder().
+                SetRecentBlockHash(blockHash.Result.Value.Blockhash).
+                SetFeePayer(AirlockWallet.playerAddress).
+                AddInstruction(instr);
+            byte[] transaction = AirlockWallet.SignMessage(Instruction);
+            PacketChamber.Add(new TransactionPacket(true, transaction));
             return  "Transaction Signed & Sent to chamber!";
         }
 
@@ -475,13 +466,12 @@ namespace Frontiers
         {
             RequestResult<ResponseValue<LatestBlockHash>> blockHash = RpcClient.GetLatestBlockHash();
             TransactionInstruction instr = FrontierProgram.AttackStructure(accounts, seasonId, matchId, matchUnitId, matchStructureId, programId);
-            byte[] Instruction = new TransactionBuilder().
-       SetRecentBlockHash(blockHash.Result.Value.Blockhash).
-       SetFeePayer(AirlockWallet.playerAddress).
-       AddInstruction(instr).
-       CompileMessage();
-            AirlockWallet.SignMessage(Instruction);
-            PacketChamber.Add(new TransactionPacket(true, Instruction));
+            TransactionBuilder Instruction = new TransactionBuilder().
+                SetRecentBlockHash(blockHash.Result.Value.Blockhash).
+                SetFeePayer(AirlockWallet.playerAddress).
+                AddInstruction(instr);
+            byte[] transaction = AirlockWallet.SignMessage(Instruction);
+            PacketChamber.Add(new TransactionPacket(true, transaction));
             return  "Transaction Signed & Sent to chamber!";
         }
 
@@ -489,13 +479,12 @@ namespace Frontiers
         {
             RequestResult<ResponseValue<LatestBlockHash>> blockHash = RpcClient.GetLatestBlockHash();
             TransactionInstruction instr = FrontierProgram.AttackUnit(accounts, seasonId, matchId, matchUnitId, matchStructureId, programId);
-            byte[] Instruction = new TransactionBuilder().
-       SetRecentBlockHash(blockHash.Result.Value.Blockhash).
-       SetFeePayer(AirlockWallet.playerAddress).
-       AddInstruction(instr).
-       CompileMessage();
-            AirlockWallet.SignMessage(Instruction);
-            PacketChamber.Add(new TransactionPacket(true, Instruction));
+            TransactionBuilder Instruction = new TransactionBuilder().
+                SetRecentBlockHash(blockHash.Result.Value.Blockhash).
+                SetFeePayer(AirlockWallet.playerAddress).
+                AddInstruction(instr);
+            byte[] transaction = AirlockWallet.SignMessage(Instruction);
+            PacketChamber.Add(new TransactionPacket(true, transaction));
             return "Transaction Signed & Sent to chamber!";
         }
 
@@ -503,13 +492,12 @@ namespace Frontiers
         {
             RequestResult<ResponseValue<LatestBlockHash>> blockHash = RpcClient.GetLatestBlockHash();
             TransactionInstruction instr = FrontierProgram.DistributeMatchRewards(accounts, seasonId, matchId, programId);
-            byte[] Instruction = new TransactionBuilder().
-        SetRecentBlockHash(blockHash.Result.Value.Blockhash).
-        SetFeePayer(AirlockWallet.playerAddress).
-        AddInstruction(instr).
-        CompileMessage();
-            AirlockWallet.SignMessage(Instruction);
-            PacketChamber.Add(new TransactionPacket(true, Instruction));
+            TransactionBuilder Instruction = new TransactionBuilder().
+                SetRecentBlockHash(blockHash.Result.Value.Blockhash).
+                SetFeePayer(AirlockWallet.playerAddress).
+                AddInstruction(instr);
+            byte[] transaction = AirlockWallet.SignMessage(Instruction);
+            PacketChamber.Add(new TransactionPacket(true, transaction));
             return "Distributed Match Rewards!";
         }
     }

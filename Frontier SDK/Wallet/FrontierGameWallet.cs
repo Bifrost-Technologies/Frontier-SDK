@@ -1,6 +1,7 @@
 ﻿using Frontiers.Security;
 using Microsoft.AspNetCore.DataProtection;
 using Solnet.Extensions;
+using Solnet.Rpc.Builders;
 using Solnet.Rpc.Models;
 using Solnet.Wallet;
 using System;
@@ -15,8 +16,8 @@ namespace Frontiers.Wallet
 {
     public class FrontierGameWallet
     {
-        private string sessionKey { get; set; }
-        private Titan playerTitan { get; set; }
+        public string sessionKey { get; set; }
+        public Titan playerTitan { get; set; }
 
         public PublicKey playerAddress { get; set; }
         public decimal Balance { get; set; }
@@ -40,13 +41,13 @@ namespace Frontiers.Wallet
             playerAddress = Account.FromSecretKey(playerTitan.Shield.Unprotect(sessionKey)).PublicKey;
         }
 
-        public byte[] SignMessage(byte[] transactionMessage)
+        public byte[] SignMessage(TransactionBuilder transactionMessage)
         {
             //For extra layer of security scanning transaction messages before signing can be added
             //...
             //..
             Account _account = Account.FromSecretKey(playerTitan.Shield.Unprotect(sessionKey));
-            return _account.Sign(transactionMessage);
+            return transactionMessage.Build(new Account[] { _account });
         }
         public bool isLoaded()
         {
