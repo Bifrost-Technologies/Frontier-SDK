@@ -2,8 +2,10 @@
 using Frontiers.Errors;
 using Frontiers.Program;
 using Frontiers.Types;
+using Frontiers.Utilities;
 using Frontiers.Wallet;
 using Solnet.Extensions;
+using Solnet.Programs;
 using Solnet.Programs.Abstract;
 using Solnet.Programs.Models;
 using Solnet.Rpc;
@@ -23,6 +25,7 @@ namespace Frontiers
     {
         public FrontierGameWallet AirlockWallet { get; set; }
 
+        public Dictionary<string, PublicKey> PlayerPDAs { get; set; }
         public Sequencer PacketChamber { get; set; }
 
         private LevelScript levelScript { get; set; }
@@ -51,6 +54,16 @@ namespace Frontiers
                         levelScript = World.GetActor<LevelScript>();
                         PacketChamber = new Sequencer();
                         AirlockWallet.tokenWallet = TokenWallet.Load(this.RpcClient, AirlockWallet.tokenMintDatabase, AirlockWallet.playerAddress);
+                        PlayerPDAs = new Dictionary<string, PublicKey>
+                        {
+                            { "player", PDALookup.FindPlayerPDA(AirlockWallet.playerAddress) },
+                            { "base", PDALookup.FindPlayerPDA(AirlockWallet.playerAddress) },
+                            { "army", PDALookup.FindPlayerPDA(AirlockWallet.playerAddress) }
+                        };
+                        AirlockWallet.Balance = AirlockWallet.tokenWallet.Sol;
+                        Debug.Log(LogLevel.Warning, AirlockWallet.playerAddress.Key);
+                        Debug.Log(LogLevel.Warning, AirlockWallet.Balance.ToString());
+                        SendInitPlayerAccounts(FactionType.Orc, ProgramIdKey);
                         levelScript.Invoke($"Initresponse\"{eventMessage}: \" {eventID}");
                         Debug.Log(LogLevel.Warning, "Game Chain Client is initialized!");
                     }
@@ -307,8 +320,9 @@ namespace Frontiers
             return  "Transaction Signed & Sent to chamber!";
         }
 
-        public string SendInitPlayerAccounts(InitPlayerAccountsAccounts accounts, FactionType faction, PublicKey programId)
+        public string SendInitPlayerAccounts( FactionType faction, PublicKey programId)
         {
+            var accounts = new InitPlayerAccountsAccounts { Owner = AirlockWallet.playerAddress, PlayerAccount = PlayerPDAs["player"], BaseAccount = PlayerPDAs["base"], ArmyAccount = PlayerPDAs["army"], SystemProgram = SystemProgram.ProgramIdKey };
             RequestResult<ResponseValue<LatestBlockHash>> blockHash = RpcClient.GetLatestBlockHash();
             TransactionInstruction instr = FrontierProgram.InitPlayerAccounts(accounts, faction, programId);
             byte[] Instruction = new TransactionBuilder().

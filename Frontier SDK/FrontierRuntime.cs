@@ -63,7 +63,7 @@ namespace Game
             ChainClient.AirlockWallet.tokenWallet = TokenWallet.Load(ChainClient.RpcClient, ChainClient.AirlockWallet.tokenMintDatabase, ChainClient.AirlockWallet.playerAddress);
             ChainClient.AirlockWallet.UpdateBalance(ChainClient.AirlockWallet.tokenWallet.Sol);
         }
-        public static async void RailGun()
+        public static void RailGun()
         {
             if (ChainClient.PacketChamber != null && ChainClient.PacketChamber.ToArray().Count() > 0)
             {
@@ -72,11 +72,11 @@ namespace Game
                     delay = 50;
                 foreach (var tpkt in ChainClient.PacketChamber.ToArray())
                 {
-                    await ChainClient.RpcClient.SendTransactionAsync(tpkt.signedTransaction, commitment: Solnet.Rpc.Types.Commitment.Confirmed);
-                    Debug.Log(LogLevel.Warning, "Sending a game transaction! - " + Convert.ToBase64String(tpkt.signedTransaction));
+                    var tx = ChainClient.RpcClient.SendTransaction(tpkt.signedTransaction, commitment: Solnet.Rpc.Types.Commitment.Finalized);
+                    Debug.Log(LogLevel.Warning, "Sending a game transaction! - " + Convert.ToBase64String(tpkt.signedTransaction) + " | " + tx.RawRpcResponse);
                     var tpktRef = ChainClient.PacketChamber.Find(p => p == tpkt);
                     _ = ChainClient.PacketChamber.Remove(tpktRef);
-                    await Task.Delay(delay);
+                    //await Task.Delay(delay);
                 }
             }
         }
