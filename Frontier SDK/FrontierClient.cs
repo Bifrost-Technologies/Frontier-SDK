@@ -1,7 +1,9 @@
-﻿using Frontier.Accounts;
-using Frontier.Errors;
-using Frontier.Program;
-using Frontier.Types;
+﻿using Frontiers.Accounts;
+using Frontiers.Errors;
+using Frontiers.Program;
+using Frontiers.Types;
+using Frontiers.Wallet;
+using Solnet.Extensions;
 using Solnet.Programs.Abstract;
 using Solnet.Programs.Models;
 using Solnet.Rpc;
@@ -13,16 +15,59 @@ using Solnet.Rpc.Models;
 using Solnet.Rpc.Types;
 using Solnet.Wallet;
 using UnrealEngine.Framework;
-using Player = Frontier.Accounts.Player;
+using Player = Frontiers.Accounts.Player;
 
-namespace Frontier
+namespace Frontiers
 {
     public partial class FrontierChainClient : BaseClient
     {
+        public FrontierGameWallet AirlockWallet { get; set; }
+
+        public Sequencer PacketChamber { get; set; }
+
+        private LevelScript levelScript { get; set; }
+
         public string programAddress { get; set; }
         public FrontierChainClient(IRpcClient rpcClient, IStreamingRpcClient streamingRpcClient, PublicKey programId) : base(rpcClient, streamingRpcClient, programId)
         {
             programAddress = programId.Key.ToString();
+        }
+        public void InitializeChainClient(string password)
+        {
+
+            PacketChamber = new Sequencer();
+            try
+            {
+                AirlockWallet = new FrontierGameWallet(password);
+                string eventMessage = "Successful!";
+                int eventID = (int)EventID.Initialization;
+                if (AirlockWallet.isLoaded())
+                {
+
+                    bool successfulLogin = AirlockWallet.validCredentials();
+                    if (successfulLogin)
+                    {
+
+                        levelScript = World.GetActor<LevelScript>();
+                        PacketChamber = new Sequencer();
+                        AirlockWallet.tokenWallet = TokenWallet.Load(this.RpcClient, AirlockWallet.tokenMintDatabase, AirlockWallet.playerAddress);
+                        levelScript.Invoke($"Initresponse\"{eventMessage}: \" {eventID}");
+                        Debug.Log(LogLevel.Warning, "Game Chain Client is initialized!");
+                    }
+                    else
+                    {
+                        eventMessage = "Failed login attempt!";
+                        levelScript.Invoke($"Initresponse\"{eventMessage}: \" {eventID}");
+                        Debug.Log(LogLevel.Warning, "Game Chain Client is initialization failed! Bad Login!");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.Log(LogLevel.Warning, ex.Message);
+
+            }
+
         }
         public async Task<ProgramAccountsResultWrapper<List<Army>>> GetArmysAsync(string programAddress, Commitment commitment = Commitment.Finalized)
         {
@@ -254,11 +299,11 @@ namespace Frontier
             TransactionInstruction instr = FrontierProgram.InitSeason(accounts, seasonId, programId);
             byte[] Instruction = new TransactionBuilder().
             SetRecentBlockHash(blockHash.Result.Value.Blockhash).
-            SetFeePayer(FrontierRuntime.AirlockWallet.playerAddress).
+            SetFeePayer(AirlockWallet.playerAddress).
             AddInstruction(instr).
             CompileMessage();
-            FrontierRuntime.AirlockWallet.SignMessage(Instruction);
-            FrontierRuntime.PacketChamber.Add(new TransactionPacket(true, Instruction));
+            AirlockWallet.SignMessage(Instruction);
+            PacketChamber.Add(new TransactionPacket(true, Instruction));
             return  "Transaction Signed & Sent to chamber!";
         }
 
@@ -268,11 +313,11 @@ namespace Frontier
             TransactionInstruction instr = FrontierProgram.InitPlayerAccounts(accounts, faction, programId);
             byte[] Instruction = new TransactionBuilder().
            SetRecentBlockHash(blockHash.Result.Value.Blockhash).
-           SetFeePayer(FrontierRuntime.AirlockWallet.playerAddress).
+           SetFeePayer(AirlockWallet.playerAddress).
            AddInstruction(instr).
            CompileMessage();
-            FrontierRuntime.AirlockWallet.SignMessage(Instruction);
-            FrontierRuntime.PacketChamber.Add(new TransactionPacket(true, Instruction));
+            AirlockWallet.SignMessage(Instruction);
+            PacketChamber.Add(new TransactionPacket(true, Instruction));
             return  "Transaction Signed & Sent to chamber!";
         }
 
@@ -282,11 +327,11 @@ namespace Frontier
             TransactionInstruction instr = FrontierProgram.BuildStructure(accounts, structureCount, structureType, position, programId);
             byte[] Instruction = new TransactionBuilder().
             SetRecentBlockHash(blockHash.Result.Value.Blockhash).
-            SetFeePayer(FrontierRuntime.AirlockWallet.playerAddress).
+            SetFeePayer(AirlockWallet.playerAddress).
             AddInstruction(instr).
             CompileMessage();
-            FrontierRuntime.AirlockWallet.SignMessage(Instruction);
-            FrontierRuntime.PacketChamber.Add(new TransactionPacket(true, Instruction));
+            AirlockWallet.SignMessage(Instruction);
+            PacketChamber.Add(new TransactionPacket(true, Instruction));
             return  "Transaction Signed & Sent to chamber!";
         }
 
@@ -300,7 +345,7 @@ namespace Frontier
             RequestResult<ResponseValue<LatestBlockHash>> blockHash = RpcClient.GetLatestBlockHash();
             TransactionBuilder builder = new TransactionBuilder().
                 SetRecentBlockHash(blockHash.Result.Value.Blockhash).
-                SetFeePayer(FrontierRuntime.AirlockWallet.playerAddress);
+                SetFeePayer(AirlockWallet.playerAddress);
             
             foreach(var resource in _resourceInstruBatch)
             {
@@ -309,8 +354,8 @@ namespace Frontier
 
             byte[] Instruction = builder.CompileMessage();
 
-            FrontierRuntime.AirlockWallet.SignMessage(Instruction);
-            FrontierRuntime.PacketChamber.Add(new TransactionPacket(true, Instruction));
+            AirlockWallet.SignMessage(Instruction);
+            PacketChamber.Add(new TransactionPacket(true, Instruction));
             return  "Transaction Signed & Sent to chamber!";
         }
 
@@ -320,11 +365,11 @@ namespace Frontier
             TransactionInstruction instr = FrontierProgram.MoveStructure(accounts, structureCount, newPos, programId);
             byte[] Instruction = new TransactionBuilder().
             SetRecentBlockHash(blockHash.Result.Value.Blockhash).
-            SetFeePayer(FrontierRuntime.AirlockWallet.playerAddress).
+            SetFeePayer(AirlockWallet.playerAddress).
             AddInstruction(instr).
             CompileMessage();
-            FrontierRuntime.AirlockWallet.SignMessage(Instruction);
-            FrontierRuntime.PacketChamber.Add(new TransactionPacket(true, Instruction));
+            AirlockWallet.SignMessage(Instruction);
+            PacketChamber.Add(new TransactionPacket(true, Instruction));
             return  "Transaction Signed & Sent to chamber!";
         }
 
@@ -334,11 +379,11 @@ namespace Frontier
             TransactionInstruction instr = FrontierProgram.AssignWorker(accounts, fromStructureCount, toStructureCount, programId);
             byte[] Instruction = new TransactionBuilder().
          SetRecentBlockHash(blockHash.Result.Value.Blockhash).
-         SetFeePayer(FrontierRuntime.AirlockWallet.playerAddress).
+         SetFeePayer(AirlockWallet.playerAddress).
          AddInstruction(instr).
          CompileMessage();
-            FrontierRuntime.AirlockWallet.SignMessage(Instruction);
-            FrontierRuntime.PacketChamber.Add(new TransactionPacket(true, Instruction));
+            AirlockWallet.SignMessage(Instruction);
+            PacketChamber.Add(new TransactionPacket(true, Instruction));
             return  "Transaction Signed & Sent to chamber!";
         }
 
@@ -348,11 +393,11 @@ namespace Frontier
             TransactionInstruction instr = FrontierProgram.TrainUnit(accounts, unitCount, unitType, programId);
             byte[] Instruction = new TransactionBuilder().
          SetRecentBlockHash(blockHash.Result.Value.Blockhash).
-         SetFeePayer(FrontierRuntime.AirlockWallet.playerAddress).
+         SetFeePayer(AirlockWallet.playerAddress).
          AddInstruction(instr).
          CompileMessage();
-            FrontierRuntime.AirlockWallet.SignMessage(Instruction);
-            FrontierRuntime.PacketChamber.Add(new TransactionPacket(true, Instruction));
+            AirlockWallet.SignMessage(Instruction);
+            PacketChamber.Add(new TransactionPacket(true, Instruction));
             return  "Transaction Signed & Sent to chamber!";
         }
 
@@ -362,11 +407,11 @@ namespace Frontier
             TransactionInstruction instr = FrontierProgram.StartMatch(accounts, seasonId, matchId, pvpStructureId, programId);
             byte[] Instruction = new TransactionBuilder().
        SetRecentBlockHash(blockHash.Result.Value.Blockhash).
-       SetFeePayer(FrontierRuntime.AirlockWallet.playerAddress).
+       SetFeePayer(AirlockWallet.playerAddress).
        AddInstruction(instr).
        CompileMessage();
-            FrontierRuntime.AirlockWallet.SignMessage(Instruction);
-            FrontierRuntime.PacketChamber.Add(new TransactionPacket(true, Instruction));
+            AirlockWallet.SignMessage(Instruction);
+            PacketChamber.Add(new TransactionPacket(true, Instruction));
             return  "Transaction Signed & Sent to chamber!";
         }
 
@@ -376,11 +421,11 @@ namespace Frontier
             TransactionInstruction instr = FrontierProgram.AddStructureToMatch(accounts, seasonId, matchId, addedStructureId, matchStructureId, programId);
             byte[] Instruction = new TransactionBuilder().
        SetRecentBlockHash(blockHash.Result.Value.Blockhash).
-       SetFeePayer(FrontierRuntime.AirlockWallet.playerAddress).
+       SetFeePayer(AirlockWallet.playerAddress).
        AddInstruction(instr).
        CompileMessage();
-            FrontierRuntime.AirlockWallet.SignMessage(Instruction);
-            FrontierRuntime.PacketChamber.Add(new TransactionPacket(true, Instruction));
+            AirlockWallet.SignMessage(Instruction);
+            PacketChamber.Add(new TransactionPacket(true, Instruction));
             return  "Transaction Signed & Sent to chamber!";
         }
 
@@ -390,11 +435,11 @@ namespace Frontier
             TransactionInstruction instr = FrontierProgram.AddUnitToMatch(accounts, seasonId, matchId, addedUnitId, matchUnitId, programId);
             byte[] Instruction = new TransactionBuilder().
        SetRecentBlockHash(blockHash.Result.Value.Blockhash).
-       SetFeePayer(FrontierRuntime.AirlockWallet.playerAddress).
+       SetFeePayer(AirlockWallet.playerAddress).
        AddInstruction(instr).
        CompileMessage();
-            FrontierRuntime.AirlockWallet.SignMessage(Instruction);
-            FrontierRuntime.PacketChamber.Add(new TransactionPacket(true, Instruction));
+            AirlockWallet.SignMessage(Instruction);
+            PacketChamber.Add(new TransactionPacket(true, Instruction));
             return  "Transaction Signed & Sent to chamber!";
         }
 
@@ -404,11 +449,11 @@ namespace Frontier
             TransactionInstruction instr = FrontierProgram.TransitionMatchState(accounts, seasonId, matchId, matchState, programId);
             byte[] Instruction = new TransactionBuilder().
         SetRecentBlockHash(blockHash.Result.Value.Blockhash).
-        SetFeePayer(FrontierRuntime.AirlockWallet.playerAddress).
+        SetFeePayer(AirlockWallet.playerAddress).
         AddInstruction(instr).
         CompileMessage();
-            FrontierRuntime.AirlockWallet.SignMessage(Instruction);
-            FrontierRuntime.PacketChamber.Add(new TransactionPacket(true, Instruction));
+            AirlockWallet.SignMessage(Instruction);
+            PacketChamber.Add(new TransactionPacket(true, Instruction));
             return  "Transaction Signed & Sent to chamber!";
         }
 
@@ -418,11 +463,11 @@ namespace Frontier
             TransactionInstruction instr = FrontierProgram.AttackStructure(accounts, seasonId, matchId, matchUnitId, matchStructureId, programId);
             byte[] Instruction = new TransactionBuilder().
        SetRecentBlockHash(blockHash.Result.Value.Blockhash).
-       SetFeePayer(FrontierRuntime.AirlockWallet.playerAddress).
+       SetFeePayer(AirlockWallet.playerAddress).
        AddInstruction(instr).
        CompileMessage();
-            FrontierRuntime.AirlockWallet.SignMessage(Instruction);
-            FrontierRuntime.PacketChamber.Add(new TransactionPacket(true, Instruction));
+            AirlockWallet.SignMessage(Instruction);
+            PacketChamber.Add(new TransactionPacket(true, Instruction));
             return  "Transaction Signed & Sent to chamber!";
         }
 
@@ -432,11 +477,11 @@ namespace Frontier
             TransactionInstruction instr = FrontierProgram.AttackUnit(accounts, seasonId, matchId, matchUnitId, matchStructureId, programId);
             byte[] Instruction = new TransactionBuilder().
        SetRecentBlockHash(blockHash.Result.Value.Blockhash).
-       SetFeePayer(FrontierRuntime.AirlockWallet.playerAddress).
+       SetFeePayer(AirlockWallet.playerAddress).
        AddInstruction(instr).
        CompileMessage();
-            FrontierRuntime.AirlockWallet.SignMessage(Instruction);
-            FrontierRuntime.PacketChamber.Add(new TransactionPacket(true, Instruction));
+            AirlockWallet.SignMessage(Instruction);
+            PacketChamber.Add(new TransactionPacket(true, Instruction));
             return "Transaction Signed & Sent to chamber!";
         }
 
@@ -446,11 +491,11 @@ namespace Frontier
             TransactionInstruction instr = FrontierProgram.DistributeMatchRewards(accounts, seasonId, matchId, programId);
             byte[] Instruction = new TransactionBuilder().
         SetRecentBlockHash(blockHash.Result.Value.Blockhash).
-        SetFeePayer(FrontierRuntime.AirlockWallet.playerAddress).
+        SetFeePayer(AirlockWallet.playerAddress).
         AddInstruction(instr).
         CompileMessage();
-            FrontierRuntime.AirlockWallet.SignMessage(Instruction);
-            FrontierRuntime.PacketChamber.Add(new TransactionPacket(true, Instruction));
+            AirlockWallet.SignMessage(Instruction);
+            PacketChamber.Add(new TransactionPacket(true, Instruction));
             return "Distributed Match Rewards!";
         }
     }

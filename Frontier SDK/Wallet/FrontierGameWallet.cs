@@ -1,4 +1,4 @@
-﻿using Frontier.Security;
+﻿using Frontiers.Security;
 using Microsoft.AspNetCore.DataProtection;
 using Solnet.Extensions;
 using Solnet.Rpc.Models;
@@ -11,7 +11,7 @@ using System.Text;
 using System.Threading.Tasks;
 using UnrealEngine.Framework;
 
-namespace Frontier.Wallet
+namespace Frontiers.Wallet
 {
     public class FrontierGameWallet
     {
@@ -32,10 +32,14 @@ namespace Frontier.Wallet
                 tokenMintDatabase = TokenMintResolver.Load();
             }catch(Exception ex) 
             {
-                UnrealEngine.Framework.Debug.Log(LogLevel.Warning, ex.Message);
+                UnrealEngine.Framework.Debug.Log(LogLevel.Warning,"TokenMintResolver issue - "+ ex.Message);
             }
-           
+            
+            LoadWallet();
+            CreateWallet();
+            playerAddress = Account.FromSecretKey(playerTitan.Shield.Unprotect(sessionKey)).PublicKey;
         }
+
         public byte[] SignMessage(byte[] transactionMessage)
         {
             //For extra layer of security scanning transaction messages before signing can be added
@@ -43,6 +47,17 @@ namespace Frontier.Wallet
             //..
             Account _account = Account.FromSecretKey(playerTitan.Shield.Unprotect(sessionKey));
             return _account.Sign(transactionMessage);
+        }
+        public bool isLoaded()
+        {
+            if(sessionKey == null || sessionKey == String.Empty)
+            {
+                return false;
+            }
+            else
+            {
+                return true;
+            }
         }
         public void UpdateBalance(decimal _balance)
         {
@@ -76,6 +91,17 @@ namespace Frontier.Wallet
             }catch(Exception ex)
             {
                 UnrealEngine.Framework.Debug.Log(LogLevel.Error, ex.ToString());
+            }
+        }
+        public bool validCredentials()
+        {
+            try
+            {
+                var sanityCheck = playerTitan.Shield.Unprotect(sessionKey);
+                return true;
+            }catch(Exception ex)
+            {
+                return false;
             }
         }
         public void LoadWallet()

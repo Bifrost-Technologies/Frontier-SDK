@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Frontier.Errors
+namespace Frontiers.Errors
 {
     public enum FrontierErrorKind : uint
     {

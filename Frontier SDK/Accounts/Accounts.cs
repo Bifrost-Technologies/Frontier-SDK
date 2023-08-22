@@ -1,4 +1,4 @@
-﻿using Frontier.Types;
+﻿using Frontiers.Types;
 using Solnet.Programs.Utilities;
 using Solnet.Wallet;
 using System;
@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Frontier.Accounts
+namespace Frontiers.Accounts
 {
     public partial class Army
     {

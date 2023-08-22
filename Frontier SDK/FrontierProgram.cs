@@ -13,14 +13,14 @@ using Solnet.Rpc.Core.Http;
 using Solnet.Rpc.Core.Sockets;
 using Solnet.Rpc.Types;
 using Solnet.Wallet;
-using Frontier;
-using Frontier.Program;
-using Frontier.Errors;
-using Frontier.Accounts;
-using Frontier.Types;
+using Frontiers;
+using Frontiers.Program;
+using Frontiers.Errors;
+using Frontiers.Accounts;
+using Frontiers.Types;
 //using UnrealEngine.Framework;
 
-    namespace Frontier.Program
+    namespace Frontiers.Program
 {
     public static class FrontierProgram
     {

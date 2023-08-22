@@ -5,8 +5,9 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.DataProtection;
+using UnrealEngine.Framework;
 
-namespace Frontier.Security
+namespace Frontiers.Security
 {
     public class Titan
     {
@@ -14,10 +15,10 @@ namespace Frontier.Security
 
         public Titan(string password)
         {
-            SHA512 sha512 = SHA512.Create();
-            var HASHED_PASS = sha512.ComputeHash(Encoding.UTF8.GetBytes(password));
-            IDataProtectionProvider protectionProvider = DataProtectionProvider.Create("Frontiers");
-          Shield = protectionProvider.CreateProtector(Convert.ToBase64String(HASHED_PASS));
+                SHA512 sha512 = SHA512.Create();
+                var HASHED_PASS = sha512.ComputeHash(Encoding.UTF8.GetBytes(password));
+                IDataProtectionProvider protectionProvider = DataProtectionProvider.Create("Frontiers");
+                Shield = protectionProvider.CreateProtector(Convert.ToBase64String(HASHED_PASS));
         }
 
     }

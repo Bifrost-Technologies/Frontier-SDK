@@ -6,8 +6,11 @@ using System.Threading.Tasks;
 
 namespace Frontiers.Types
 {
-    public class Sequencer : List<TransactionPacket>
+    public enum EventID
     {
-        public int prioritycount {  get; set; }
+        Login,
+        Initialization,
+        PlayerSync,
+        Instruction
     }
 }

@@ -1,4 +1,4 @@
-﻿using Frontier.Program;
+﻿using Frontiers.Program;
 using Solnet.Programs;
 using Solnet.Programs.Utilities;
 using Solnet.Wallet;
@@ -6,7 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Frontier.Utilities
+namespace Frontiers.Utilities
 {
     /// <summary>
     /// PDA Lookup Class to make finding PDAs simple
