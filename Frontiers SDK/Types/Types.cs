@@ -5,9 +5,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using UnrealEngine.Framework;
 
 namespace Frontiers.Types
 {
+    public class login : Actor
+    {
+        public string? Password { get; set; }
+    }
     public class InitSeasonAccounts
     {
         public PublicKey Owner { get; set; }
@@ -532,5 +537,25 @@ namespace Frontiers.Types
         Archer,
         Siege,
         Healer
+    }
+
+    public enum ClientRequest
+    {
+        InitPlayerAccounts,
+        SendBuildStructure,
+        CollectResources,
+        SendMoveStructure,
+        AssignWorker,
+        TrainUnit,
+        StartMatch,
+        AddStructureToMatch,
+        AddUnitToMatch,
+        TransitionMatchState,
+        SendAttackStructure,
+        SendAttackUnit,
+        SendDistributeMatchRewards,
+        GetKingdomStructureCount
+
+
     }
 }

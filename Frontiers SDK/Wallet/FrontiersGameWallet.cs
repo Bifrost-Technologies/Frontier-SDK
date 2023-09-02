@@ -27,18 +27,27 @@ namespace Frontiers.Wallet
         public TokenWallet tokenWallet { get; set; }
         public FrontierGameWallet(string password) 
         {
-            playerTitan = new Titan(password);
             try
             {
-                tokenMintDatabase = TokenMintResolver.Load();
-            }catch(Exception ex) 
+
+
+                playerTitan = new Titan(password);
+                try
+                {
+                    tokenMintDatabase = TokenMintResolver.Load();
+                }
+                catch (Exception ex)
+                {
+                    UnrealEngine.Framework.Debug.Log(LogLevel.Warning, "TokenMintResolver issue - " + ex.Message);
+                }
+
+                LoadWallet();
+                CreateWallet();
+                playerAddress = Account.FromSecretKey(playerTitan.Shield.Unprotect(sessionKey)).PublicKey;
+            }catch(Exception ex)
             {
-                UnrealEngine.Framework.Debug.Log(LogLevel.Warning,"TokenMintResolver issue - "+ ex.Message);
+                UnrealEngine.Framework.Debug.Log(LogLevel.Warning, ex.Message);
             }
-            
-            LoadWallet();
-            CreateWallet();
-            playerAddress = Account.FromSecretKey(playerTitan.Shield.Unprotect(sessionKey)).PublicKey;
         }
 
         public byte[] SignMessage(TransactionBuilder transactionMessage)
@@ -109,9 +118,9 @@ namespace Frontiers.Wallet
         {
             try
             {
-                if(File.Exists(@"C:\\Program Files (x86)\Bifrost\Frontier\sealed_airlock.wallet"))
+                if(File.Exists(@"C:\\Program Files (x86)\Bifrost\Frontiers\sealed_airlock.wallet"))
                 {
-                    sessionKey = File.ReadAllText(@"C:\\Program Files (x86)\Bifrost\Frontier\sealed_airlock.wallet");
+                    sessionKey = File.ReadAllText(@"C:\\Program Files (x86)\Bifrost\Frontiers\sealed_airlock.wallet");
                     freshWallet = false;
                 }
                 else
@@ -128,7 +137,7 @@ namespace Frontiers.Wallet
         {
             try
             { 
-                File.WriteAllText(@"C:\\Program Files (x86)\Bifrost\Frontier\sealed_airlock.wallet", sessionKey);
+                File.WriteAllText(@"C:\\Program Files (x86)\Bifrost\Frontiers\sealed_airlock.wallet", sessionKey);
             }
             catch (Exception ex) 
             {

@@ -26,18 +26,17 @@ namespace Frontiers
     public partial class FrontierChainClient : BaseClient
     {
         public FrontierGameWallet AirlockWallet { get; set; }
-
+        public PlayerBase Kingdom { get; set; }
         public Dictionary<string, PublicKey> PlayerPDAs { get; set; }
         public Sequencer PacketChamber { get; set; }
-
-        private LevelScript levelScript { get; set; }
 
         public string programAddress { get; set; }
         public FrontierChainClient(IRpcClient rpcClient, IStreamingRpcClient streamingRpcClient, PublicKey programId) : base(rpcClient, streamingRpcClient, programId)
         {
             programAddress = programId.Key.ToString();
         }
-        public void InitializeChainClient(string password)
+
+        public async void InitializeChainClient(string password)
         {
 
             PacketChamber = new Sequencer();
@@ -53,26 +52,46 @@ namespace Frontiers
                     if (successfulLogin)
                     {
                         
-                        levelScript = World.GetActor<LevelScript>();
+                        
                         PacketChamber = new Sequencer();
                         AirlockWallet.tokenWallet = TokenWallet.Load(this.RpcClient, AirlockWallet.tokenMintDatabase, AirlockWallet.playerAddress);
+                        var pPDA = PDALookup.FindPlayerPDA(AirlockWallet.playerAddress);
                         PlayerPDAs = new Dictionary<string, PublicKey>
                         {
-                            { "player", PDALookup.FindPlayerPDA(AirlockWallet.playerAddress) },
-                            { "base", PDALookup.FindPlayerPDA(AirlockWallet.playerAddress) },
-                            { "army", PDALookup.FindPlayerPDA(AirlockWallet.playerAddress) }
+                            { "player", pPDA },
+                            { "base", PDALookup.FindKingdomPDA(pPDA) },
+                            { "army", PDALookup.FindArmyPDA(pPDA) }
                         };
+                        Debug.Log(LogLevel.Warning, "Player PDA: "+ PlayerPDAs["player"]);
+                        Debug.Log(LogLevel.Warning, "Base PDA: " + PlayerPDAs["base"]);
+                        Debug.Log(LogLevel.Warning, "Army PDA: " + PlayerPDAs["army"]);
+                        try
+                        {
+                            var pBase = await GetPlayerBaseAsync(PlayerPDAs["base"].Key);
+                            if (pBase != null && pBase.ParsedResult != null)
+                            {
+                                Kingdom = pBase.ParsedResult;
+                                Debug.Log(LogLevel.Warning, "Kingdom Ready: "+Kingdom.IsInitialized.ToString());
+                                Debug.Log(LogLevel.Warning, "Kingdom Count:"+ Kingdom.StructureCount.ToString());
+                            }
+                            var structures = await GetStructuresAsync(PlayerPDAs["base"].Key);
+                           
+
+                            }catch(Exception ex)
+                        {
+                            Debug.Log(LogLevel.Warning, "Get playerbase issue" + ex.Message);
+                        }
                         AirlockWallet.Balance = AirlockWallet.tokenWallet.Sol;
                         Debug.Log(LogLevel.Warning, AirlockWallet.playerAddress.Key);
                         Debug.Log(LogLevel.Warning, AirlockWallet.Balance.ToString());
-                        SendInitPlayerAccounts(FactionType.Orc, ProgramIdKey);
-                        levelScript.Invoke($"Initresponse\"{eventMessage}: \" {eventID}");
+                        //SendInitPlayerAccounts(FactionType.Orc, ProgramIdKey);
+                      
                         Debug.Log(LogLevel.Warning, "Game Chain Client is initialized!");
                     }
                     else
                     {
                         eventMessage = "Failed login attempt!";
-                        levelScript.Invoke($"Initresponse\"{eventMessage}: \" {eventID}");
+                    
                         Debug.Log(LogLevel.Warning, "Game Chain Client is initialization failed! Bad Login!");
                     }
                 }
@@ -313,9 +332,9 @@ namespace Frontiers
             RequestResult<ResponseValue<LatestBlockHash>> blockHash = RpcClient.GetLatestBlockHash();
             TransactionInstruction instr = FrontierProgram.InitSeason(accounts, seasonId, programId);
             TransactionBuilder Instruction = new TransactionBuilder().
-          SetRecentBlockHash(blockHash.Result.Value.Blockhash).
-          SetFeePayer(AirlockWallet.playerAddress).
-          AddInstruction(instr);
+                SetRecentBlockHash(blockHash.Result.Value.Blockhash).
+                SetFeePayer(AirlockWallet.playerAddress).
+                AddInstruction(instr);
             byte[] transaction = AirlockWallet.SignMessage(Instruction);
             PacketChamber.Add(new TransactionPacket(true, transaction));
             return  "Transaction Signed & Sent to chamber!";
@@ -327,22 +346,22 @@ namespace Frontiers
             RequestResult<ResponseValue<LatestBlockHash>> blockHash = RpcClient.GetLatestBlockHash();
             TransactionInstruction instr = FrontierProgram.InitPlayerAccounts(accounts, faction, programId);
             TransactionBuilder Instruction = new TransactionBuilder().
-           SetRecentBlockHash(blockHash.Result.Value.Blockhash).
-           SetFeePayer(AirlockWallet.playerAddress).
-           AddInstruction(instr);
+                SetRecentBlockHash(blockHash.Result.Value.Blockhash).
+                SetFeePayer(AirlockWallet.playerAddress).
+                AddInstruction(instr);
             byte[] transaction = AirlockWallet.SignMessage(Instruction);
             PacketChamber.Add(new TransactionPacket(true, transaction));
             return  "Transaction Signed & Sent to chamber!";
         }
 
-        public string SendBuildStructureAsync(BuildStructureAccounts accounts, uint structureCount, StructureType structureType, Position position, PublicKey programId)
+        public string SendBuildStructure(BuildStructureAccounts accounts, uint structureCount, StructureType structureType, Position position, PublicKey programId)
         {
             RequestResult<ResponseValue<LatestBlockHash>> blockHash = RpcClient.GetLatestBlockHash();
             TransactionInstruction instr = FrontierProgram.BuildStructure(accounts, structureCount, structureType, position, programId);
             TransactionBuilder Instruction = new TransactionBuilder().
-           SetRecentBlockHash(blockHash.Result.Value.Blockhash).
-           SetFeePayer(AirlockWallet.playerAddress).
-           AddInstruction(instr);
+                SetRecentBlockHash(blockHash.Result.Value.Blockhash).
+                SetFeePayer(AirlockWallet.playerAddress).
+                AddInstruction(instr);
             byte[] transaction = AirlockWallet.SignMessage(Instruction);
             PacketChamber.Add(new TransactionPacket(true, transaction));
             return  "Transaction Signed & Sent to chamber!";
@@ -353,7 +372,7 @@ namespace Frontiers
             TransactionInstruction instr = FrontierProgram.CollectResources(accounts, structureCount, programId);
             return instr;
         }
-        public string SendCollectResourcesAsync(List<TransactionInstruction> _resourceInstruBatch)
+        public string SendCollectResources(List<TransactionInstruction> _resourceInstruBatch)
         {
             RequestResult<ResponseValue<LatestBlockHash>> blockHash = RpcClient.GetLatestBlockHash();
             TransactionBuilder builder = new TransactionBuilder().
@@ -371,7 +390,7 @@ namespace Frontiers
             return  "Transaction Signed & Sent to chamber!";
         }
 
-        public string SendMoveStructureAsync(MoveStructureAccounts accounts, uint structureCount, Position newPos, PublicKey feePayer, Func<byte[], PublicKey, byte[]> signingCallback, PublicKey programId)
+        public string SendMoveStructureAsync(MoveStructureAccounts accounts, uint structureCount, Position newPos, PublicKey programId)
         {
             RequestResult<ResponseValue<LatestBlockHash>> blockHash = RpcClient.GetLatestBlockHash();
             TransactionInstruction instr = FrontierProgram.MoveStructure(accounts, structureCount, newPos, programId);
@@ -384,7 +403,7 @@ namespace Frontiers
             return  "Transaction Signed & Sent to chamber!";
         }
 
-        public string SendAssignWorkerAsync(AssignWorkerAccounts accounts, uint fromStructureCount, uint toStructureCount, PublicKey feePayer, Func<byte[], PublicKey, byte[]> signingCallback, PublicKey programId)
+        public string SendAssignWorker(AssignWorkerAccounts accounts, uint fromStructureCount, uint toStructureCount, PublicKey programId)
         {
             RequestResult<ResponseValue<LatestBlockHash>> blockHash = RpcClient.GetLatestBlockHash();
             TransactionInstruction instr = FrontierProgram.AssignWorker(accounts, fromStructureCount, toStructureCount, programId);
@@ -397,7 +416,7 @@ namespace Frontiers
             return  "Transaction Signed & Sent to chamber!";
         }
 
-        public string SendTrainUnitAsync(TrainUnitAccounts accounts, uint unitCount, UnitType unitType, PublicKey feePayer, Func<byte[], PublicKey, byte[]> signingCallback, PublicKey programId)
+        public string SendTrainUnitAsync(TrainUnitAccounts accounts, uint unitCount, UnitType unitType,  PublicKey programId)
         {
             RequestResult<ResponseValue<LatestBlockHash>> blockHash = RpcClient.GetLatestBlockHash();
             TransactionInstruction instr = FrontierProgram.TrainUnit(accounts, unitCount, unitType, programId);
@@ -410,7 +429,7 @@ namespace Frontiers
             return  "Transaction Signed & Sent to chamber!";
         }
 
-        public string SendStartMatchAsync(StartMatchAccounts accounts, uint seasonId, uint matchId, uint pvpStructureId, PublicKey feePayer, Func<byte[], PublicKey, byte[]> signingCallback, PublicKey programId)
+        public string SendStartMatchAsync(StartMatchAccounts accounts, uint seasonId, uint matchId, uint pvpStructureId, PublicKey programId)
         {
             RequestResult<ResponseValue<LatestBlockHash>> blockHash = RpcClient.GetLatestBlockHash();
             TransactionInstruction instr = FrontierProgram.StartMatch(accounts, seasonId, matchId, pvpStructureId, programId);
@@ -423,7 +442,7 @@ namespace Frontiers
             return  "Transaction Signed & Sent to chamber!";
         }
 
-        public string SendAddStructureToMatchAsync(AddStructureToMatchAccounts accounts, uint seasonId, uint matchId, uint addedStructureId, uint matchStructureId, PublicKey feePayer, Func<byte[], PublicKey, byte[]> signingCallback, PublicKey programId)
+        public string SendAddStructureToMatchAsync(AddStructureToMatchAccounts accounts, uint seasonId, uint matchId, uint addedStructureId, uint matchStructureId, PublicKey programId)
         {
             RequestResult<ResponseValue<LatestBlockHash>> blockHash = RpcClient.GetLatestBlockHash();
             TransactionInstruction instr = FrontierProgram.AddStructureToMatch(accounts, seasonId, matchId, addedStructureId, matchStructureId, programId);
@@ -449,7 +468,7 @@ namespace Frontiers
             return  "Transaction Signed & Sent to chamber!";
         }
 
-        public string SendTransitionMatchStateAsync(TransitionMatchStateAccounts accounts, uint seasonId, uint matchId, MatchState matchState, PublicKey feePayer, Func<byte[], PublicKey, byte[]> signingCallback, PublicKey programId)
+        public string SendTransitionMatchStateAsync(TransitionMatchStateAccounts accounts, uint seasonId, uint matchId, MatchState matchState, PublicKey programId)
         {
             RequestResult<ResponseValue<LatestBlockHash>> blockHash = RpcClient.GetLatestBlockHash();
             TransactionInstruction instr = FrontierProgram.TransitionMatchState(accounts, seasonId, matchId, matchState, programId);
@@ -462,7 +481,7 @@ namespace Frontiers
             return  "Transaction Signed & Sent to chamber!";
         }
 
-        public string SendAttackStructureAsync(AttackStructureAccounts accounts, uint seasonId, uint matchId, uint matchUnitId, uint matchStructureId, PublicKey feePayer, Func<byte[], PublicKey, byte[]> signingCallback, PublicKey programId)
+        public string SendAttackStructureAsync(AttackStructureAccounts accounts, uint seasonId, uint matchId, uint matchUnitId, uint matchStructureId, PublicKey programId)
         {
             RequestResult<ResponseValue<LatestBlockHash>> blockHash = RpcClient.GetLatestBlockHash();
             TransactionInstruction instr = FrontierProgram.AttackStructure(accounts, seasonId, matchId, matchUnitId, matchStructureId, programId);
@@ -475,7 +494,7 @@ namespace Frontiers
             return  "Transaction Signed & Sent to chamber!";
         }
 
-        public string SendAttackUnitAsync(AttackUnitAccounts accounts, uint seasonId, uint matchId, uint matchUnitId, uint matchStructureId, PublicKey feePayer, Func<byte[], PublicKey, byte[]> signingCallback, PublicKey programId)
+        public string SendAttackUnitAsync(AttackUnitAccounts accounts, uint seasonId, uint matchId, uint matchUnitId, uint matchStructureId, PublicKey programId)
         {
             RequestResult<ResponseValue<LatestBlockHash>> blockHash = RpcClient.GetLatestBlockHash();
             TransactionInstruction instr = FrontierProgram.AttackUnit(accounts, seasonId, matchId, matchUnitId, matchStructureId, programId);
@@ -488,7 +507,7 @@ namespace Frontiers
             return "Transaction Signed & Sent to chamber!";
         }
 
-        public string SendDistributeMatchRewardsAsync(DistributeMatchRewardsAccounts accounts, uint seasonId, uint matchId, PublicKey feePayer, Func<byte[], PublicKey, byte[]> signingCallback, PublicKey programId)
+        public string SendDistributeMatchRewardsAsync(DistributeMatchRewardsAccounts accounts, uint seasonId, uint matchId, PublicKey programId)
         {
             RequestResult<ResponseValue<LatestBlockHash>> blockHash = RpcClient.GetLatestBlockHash();
             TransactionInstruction instr = FrontierProgram.DistributeMatchRewards(accounts, seasonId, matchId, programId);
